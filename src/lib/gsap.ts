@@ -34,33 +34,6 @@ import { CSSRulePlugin } from "gsap/CSSRulePlugin";
 import { GSDevTools } from "gsap/GSDevTools";
 import { EasePack } from "gsap/EasePack";
 
-gsap.registerPlugin(
-  ScrollTrigger,
-  ScrollSmoother,
-  ScrollToPlugin,
-  Observer,
-  SplitText,
-  Draggable,
-  Flip,
-  MotionPathPlugin,
-  MotionPathHelper,
-  DrawSVGPlugin,
-  MorphSVGPlugin,
-  InertiaPlugin,
-  Physics2DPlugin,
-  PhysicsPropsPlugin,
-  CustomEase,
-  CustomBounce,
-  CustomWiggle,
-  ScrambleTextPlugin,
-  TextPlugin,
-  PixiPlugin,
-  EaselPlugin,
-  CSSRulePlugin,
-  GSDevTools,
-  EasePack
-);
-
 export {
   gsap,
   ScrollTrigger,

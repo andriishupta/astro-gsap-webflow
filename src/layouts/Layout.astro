@@ -1,0 +1,75 @@
+---
+import "@/styles/global.css";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro + GSAP</title>
+
+    <script>
+      import {
+        gsap,
+        ScrollTrigger,
+        ScrollSmoother,
+        ScrollToPlugin,
+        Observer,
+        SplitText,
+        Draggable,
+        Flip,
+        MotionPathPlugin,
+        MotionPathHelper,
+        DrawSVGPlugin,
+        MorphSVGPlugin,
+        InertiaPlugin,
+        Physics2DPlugin,
+        PhysicsPropsPlugin,
+        CustomEase,
+        CustomBounce,
+        CustomWiggle,
+        ScrambleTextPlugin,
+        TextPlugin,
+        PixiPlugin,
+        EaselPlugin,
+        CSSRulePlugin,
+        GSDevTools,
+        EasePack,
+      } from "@/lib/gsap";
+
+      gsap.registerPlugin(
+        ScrollTrigger,
+        ScrollSmoother,
+        ScrollToPlugin,
+        Observer,
+        SplitText,
+        Draggable,
+        Flip,
+        MotionPathPlugin,
+        MotionPathHelper,
+        DrawSVGPlugin,
+        MorphSVGPlugin,
+        InertiaPlugin,
+        Physics2DPlugin,
+        PhysicsPropsPlugin,
+        CustomEase,
+        CustomBounce,
+        CustomWiggle,
+        ScrambleTextPlugin,
+        TextPlugin,
+        PixiPlugin,
+        EaselPlugin,
+        CSSRulePlugin,
+        GSDevTools,
+        EasePack,
+      );
+
+      GSDevTools.create();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
