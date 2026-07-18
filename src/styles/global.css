@@ -1,2 +1,49 @@
 @import "tailwindcss";
-@plugin "daisyui";
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #020816;
+  scrollbar-color: rgba(182, 218, 255, 0.36) #020816;
+  scrollbar-width: thin;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  overflow-x: hidden;
+  background: #020816;
+  color: #f5f9ff;
+  font-family: "Helvetica Neue", "Neue Haas Grotesk Text Pro", Arial, sans-serif;
+}
+
+button,
+dialog {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+::selection {
+  background: rgba(156, 206, 255, 0.28);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

@@ -1,5 +1,15 @@
 ---
 import "@/styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Cathedral of Threads",
+  description = "An interactive journey to the place where every memory converges.",
+} = Astro.props;
 ---
 
 <html lang="en">
@@ -8,66 +18,9 @@ import "@/styles/global.css";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro + GSAP</title>
-
-    <script>
-      import {
-        gsap,
-        ScrollTrigger,
-        ScrollSmoother,
-        ScrollToPlugin,
-        Observer,
-        SplitText,
-        Draggable,
-        Flip,
-        MotionPathPlugin,
-        MotionPathHelper,
-        DrawSVGPlugin,
-        MorphSVGPlugin,
-        InertiaPlugin,
-        Physics2DPlugin,
-        PhysicsPropsPlugin,
-        CustomEase,
-        CustomBounce,
-        CustomWiggle,
-        ScrambleTextPlugin,
-        TextPlugin,
-        PixiPlugin,
-        EaselPlugin,
-        CSSRulePlugin,
-        GSDevTools,
-        EasePack,
-      } from "@/lib/gsap";
-
-      gsap.registerPlugin(
-        ScrollTrigger,
-        ScrollSmoother,
-        ScrollToPlugin,
-        Observer,
-        SplitText,
-        Draggable,
-        Flip,
-        MotionPathPlugin,
-        MotionPathHelper,
-        DrawSVGPlugin,
-        MorphSVGPlugin,
-        InertiaPlugin,
-        Physics2DPlugin,
-        PhysicsPropsPlugin,
-        CustomEase,
-        CustomBounce,
-        CustomWiggle,
-        ScrambleTextPlugin,
-        TextPlugin,
-        PixiPlugin,
-        EaselPlugin,
-        CSSRulePlugin,
-        GSDevTools,
-        EasePack,
-      );
-
-      GSDevTools.create();
-    </script>
+    <meta name="theme-color" content="#020816" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
   </head>
   <body>
     <slot />

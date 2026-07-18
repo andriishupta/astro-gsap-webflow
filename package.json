@@ -12,6 +12,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "check": "astro check",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -20,9 +21,12 @@
     "@tailwindcss/vite": "^4.3.2",
     "astro": "^6.3.1",
     "gsap": "^3.15.0",
-    "tailwindcss": "^4.3.2"
+    "tailwindcss": "^4.3.2",
+    "three": "^0.185.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/three": "^0.185.1",
     "daisyui": "^5.6.16",
     "typescript": "^6.0.3"
   }

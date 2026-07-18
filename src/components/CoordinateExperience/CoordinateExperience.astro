@@ -1,0 +1,110 @@
+---
+import "./CoordinateExperience.css";
+---
+
+<main class="coordinate-experience" data-coordinate-experience>
+  <section class="coordinate-stage" aria-label="Cathedral of Threads interactive scene">
+    <canvas class="coordinate-canvas" data-coordinate-canvas aria-hidden="true"></canvas>
+    <div class="coordinate-atmosphere" aria-hidden="true"></div>
+
+    <div class="coordinate-loader" data-coordinate-loader role="status" aria-live="polite">
+      <div class="coordinate-loader__content">
+        <span class="coordinate-loader__label" data-loader-label>Connecting</span>
+        <span class="coordinate-loader__line" aria-hidden="true">
+          <span data-loader-line></span>
+        </span>
+      </div>
+    </div>
+
+    <div class="coordinate-copy coordinate-copy--intro" data-coordinate-intro>
+      <h1>
+        <span>Cathedral</span>
+        <span>of Threads</span>
+      </h1>
+      <p>The coordinate where every memory converges.</p>
+    </div>
+
+    <div class="coordinate-chapters" aria-live="polite">
+      <p class="coordinate-chapter" data-coordinate-chapter="approach">
+        Follow what remembers.
+      </p>
+      <p class="coordinate-chapter" data-coordinate-chapter="convergence">
+        Every path remembers.
+      </p>
+      <p class="coordinate-chapter coordinate-chapter--final" data-coordinate-chapter="afterglow">
+        Nothing is ever truly lost.
+      </p>
+    </div>
+
+    <div class="coordinate-scroll-cue" data-coordinate-scroll-cue>
+      <span class="coordinate-scroll-cue__mouse" aria-hidden="true">
+        <span data-coordinate-scroll-wheel></span>
+      </span>
+      <span>Scroll to enter</span>
+      <span class="coordinate-scroll-cue__rule" aria-hidden="true"></span>
+    </div>
+
+    <div class="coordinate-progress" aria-hidden="true">
+      <span class="coordinate-progress__track">
+        <span class="coordinate-progress__fill" data-coordinate-progress></span>
+      </span>
+      <span class="coordinate-progress__index" data-coordinate-index>01</span>
+    </div>
+
+    <nav class="coordinate-utility" aria-label="Information">
+      <button type="button" data-dialog-open="about-dialog">About</button>
+    </nav>
+
+    <dialog
+      class="coordinate-dialog"
+      id="about-dialog"
+      data-coordinate-dialog
+      aria-labelledby="about-title"
+      aria-describedby="about-description"
+    >
+      <div class="coordinate-dialog__veil" data-dialog-veil aria-hidden="true"></div>
+      <div class="coordinate-dialog__panel" data-dialog-panel>
+        <button
+          class="coordinate-dialog__close"
+          type="button"
+          data-dialog-close
+          aria-label="Close About"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="coordinate-dialog__content" data-dialog-content>
+          <p class="coordinate-dialog__number">About the experiment</p>
+          <h2 id="about-title">A place outside time.</h2>
+          <div class="coordinate-dialog__copy" id="about-description">
+            <p>
+              Cathedral of Threads is a hackathon-built interactive experiment about
+              collective memory. Every line and dune is generated in real time and drawn
+              toward the same impossible coordinate.
+            </p>
+            <p>
+              The initial spark came from the idea of the Coordinate in
+              <cite>Attack on Titan</cite>. This is an independent visual interpretation:
+              no characters, production artwork, dialogue, music, or story material is
+              reproduced.
+            </p>
+            <p>
+              The project is not affiliated with, endorsed by, or connected to the anime,
+              manga, studios, publishers, or rights holders.
+            </p>
+          </div>
+          <p class="coordinate-dialog__meta">A hackathon project built with Astro, Three.js, and GSAP.</p>
+        </div>
+      </div>
+    </dialog>
+
+    <noscript>
+      <p class="coordinate-fallback">
+        This experience needs JavaScript and WebGL to render the Coordinate.
+      </p>
+    </noscript>
+  </section>
+</main>
+
+<script>
+  import "./CoordinateExperience";
+</script>
