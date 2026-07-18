@@ -1215,6 +1215,7 @@ function mulberry32(seed: number) {
 
 function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
   const openButton = scope.querySelector<HTMLButtonElement>("[data-dialog-open]");
+  const interfaceLayer = scope.querySelector<HTMLElement>("[data-coordinate-interface]");
   const dialog = scope.querySelector<HTMLElement>("[data-coordinate-dialog]");
   const veil = dialog?.querySelector<HTMLElement>("[data-dialog-veil]");
   const panel = dialog?.querySelector<HTMLElement>("[data-dialog-panel]");
@@ -1224,6 +1225,7 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
 
   if (
     !openButton ||
+    !interfaceLayer ||
     !dialog ||
     !veil ||
     !panel ||
@@ -1249,7 +1251,9 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
 
   const finishClose = () => {
     dialog.hidden = true;
-    gsap.set([dialog, veil, panel, grain, content], { clearProps: "all" });
+    gsap.set([dialog, veil, panel, grain, content, interfaceLayer], {
+      clearProps: "all",
+    });
     openButton.focus();
   };
 
@@ -1327,6 +1331,15 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
           ease: "power2.in",
         },
         0.05,
+      )
+      .to(
+        interfaceLayer,
+        {
+          autoAlpha: 1,
+          duration: reducedMotion ? 0.01 : duration * 0.42,
+          ease: "power2.out",
+        },
+        reducedMotion ? 0 : duration * 0.56,
       );
   };
 
@@ -1368,6 +1381,15 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
         {
           autoAlpha: 1,
           duration: duration * 0.86,
+          ease: "power2.out",
+        },
+        0,
+      )
+      .to(
+        interfaceLayer,
+        {
+          autoAlpha: 0,
+          duration: reducedMotion ? 0.01 : 0.2,
           ease: "power2.out",
         },
         0,
