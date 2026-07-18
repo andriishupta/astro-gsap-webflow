@@ -352,8 +352,9 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   coreLight.position.set(base.x, base.y + 1.1, base.z);
   world.add(coreLight);
 
-  const angularSectionCount = 120;
+  const angularSectionCount = 360;
   const angularSectionArc = (Math.PI * 2) / angularSectionCount;
+  const smokeSpreadArc = (Math.PI * 2) / 120;
   const angularOffset = random() * Math.PI * 2;
   const densityAnchorCount = 15;
   const densityAnchors = Array.from(
@@ -393,7 +394,7 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
       heightAnchors[nextDensityAnchorIndex],
       densityProgress,
     );
-    const occupancyThreshold = 0.17 + sectionDensity * 0.6;
+    const occupancyThreshold = 0.1 + sectionDensity * 0.36;
     if (random() > occupancyThreshold) {
       continue;
     }
@@ -405,9 +406,9 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
 
     for (let smokeIndex = 0; smokeIndex < smokeCount; smokeIndex += 1) {
       const farAngle =
-        sectionAngle + (random() - 0.5) * angularSectionArc * 2.8;
+        sectionAngle + (random() - 0.5) * smokeSpreadArc * 2.8;
       const entryDrift =
-        sectionBend + fractalSigned(random, 2) * angularSectionArc * 0.12;
+        sectionBend + fractalSigned(random, 2) * smokeSpreadArc * 0.12;
       const rimAngle = farAngle + entryDrift;
       const farRadius = 360 + random() * 110;
       const outerRadius = 88 + random() * 56;
