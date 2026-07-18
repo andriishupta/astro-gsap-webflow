@@ -8,11 +8,11 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 type SceneController = {
-  cameraPath: THREE.Group;
-  cameraTarget: THREE.Vector3;
-  world: THREE.Group;
+  motionState: {
+    journey: number;
+    illumination: number;
+  };
   treeMaterials: LineMaterial[];
-  bloom: UnrealBloomPass;
   dispose: () => void;
 };
 
@@ -65,7 +65,10 @@ async function initExperience(experience: HTMLElement) {
     !loaderLine ||
     !intro ||
     !scrollCue ||
-    !progress
+    !progress ||
+    !chapters.approach ||
+    !chapters.convergence ||
+    !chapters.afterglow
   ) {
     return;
   }
@@ -142,62 +145,43 @@ async function initExperience(experience: HTMLElement) {
       scrollTimeline
         .addLabel("threshold", 0)
         .to(progress, { scaleY: 1, duration: 1 }, 0)
+        .to(sceneController.motionState, { journey: 1, duration: 1 }, 0)
+        .to(
+          sceneController.motionState,
+          { illumination: 1, duration: 0.38, ease: "power1.in" },
+          0.62,
+        )
         .to(intro, { autoAlpha: 0, y: -72, scale: 0.92, duration: 0.16 }, 0.04)
         .to(scrollCue, { autoAlpha: 0, y: 22, duration: 0.1 }, 0.03)
-        .to(
-          sceneController.cameraPath.position,
-          { x: -0.6, y: 0.65, z: 3.5, duration: 0.34 },
-          0,
-        )
-        .to(sceneController.world.rotation, { y: 0.12, duration: 0.34 }, 0)
         .fromTo(
           chapters.approach,
           { autoAlpha: 0, y: 32 },
-          { autoAlpha: 1, y: 0, duration: 0.08 },
-          0.18,
+          { autoAlpha: 1, y: 0, duration: 0.1 },
+          0.16,
         )
-        .to(chapters.approach, { autoAlpha: 0, y: -24, duration: 0.08 }, 0.32)
-        .addLabel("approach", 0.34)
-        .to(
-          sceneController.cameraPath.position,
-          { x: 0.8, y: 0.5, z: 1.5, duration: 0.28 },
-          0.34,
-        )
-        .to(sceneController.cameraTarget, { x: 0, y: 5.3, z: -18, duration: 0.28 }, 0.34)
-        .to(sceneController.world.rotation, { y: -0.16, duration: 0.28 }, 0.34)
-        .to(sceneController.treeMaterials[0], { opacity: 0.005, duration: 0.2 }, 0.42)
-        .to(sceneController.treeMaterials[1], { opacity: 0.0085, duration: 0.2 }, 0.42)
-        .to(sceneController.treeMaterials[2], { opacity: 0.0036, duration: 0.2 }, 0.42)
+        .to(chapters.approach, { autoAlpha: 0, y: -24, duration: 0.1 }, 0.29)
+        .addLabel("approach", 0.32)
+        .to(sceneController.treeMaterials[0], { opacity: 0.006, duration: 0.28 }, 0.34)
+        .to(sceneController.treeMaterials[1], { opacity: 0.0095, duration: 0.28 }, 0.34)
+        .to(sceneController.treeMaterials[2], { opacity: 0.0042, duration: 0.28 }, 0.34)
         .fromTo(
           chapters.convergence,
           { autoAlpha: 0, y: 32 },
-          { autoAlpha: 1, y: 0, duration: 0.08 },
-          0.49,
+          { autoAlpha: 1, y: 0, duration: 0.1 },
+          0.4,
         )
-        .to(chapters.convergence, { autoAlpha: 0, y: -24, duration: 0.08 }, 0.63)
-        .addLabel("convergence", 0.62)
-        .to(
-          sceneController.cameraPath.position,
-          { x: -2.2, y: 0.6, z: 3.5, duration: 0.26 },
-          0.62,
-        )
-        .to(sceneController.cameraTarget, { x: 0, y: 5.8, z: -18, duration: 0.26 }, 0.62)
-        .to(sceneController.world.rotation, { y: 0.24, duration: 0.26 }, 0.62)
-        .to(sceneController.bloom, { strength: 0.82, radius: 1, duration: 0.2 }, 0.67)
+        .to(chapters.convergence, { autoAlpha: 0, y: -24, duration: 0.1 }, 0.57)
+        .addLabel("convergence", 0.6)
+        .to(sceneController.treeMaterials[0], { opacity: 0.009, duration: 0.36 }, 0.64)
+        .to(sceneController.treeMaterials[1], { opacity: 0.014, duration: 0.36 }, 0.64)
+        .to(sceneController.treeMaterials[2], { opacity: 0.0064, duration: 0.36 }, 0.64)
         .fromTo(
           chapters.afterglow,
           { autoAlpha: 0, y: 36 },
-          { autoAlpha: 1, y: 0, duration: 0.1 },
-          0.78,
+          { autoAlpha: 1, y: 0, duration: 0.12 },
+          0.7,
         )
-        .addLabel("afterglow", 0.82)
-        .to(
-          sceneController.cameraPath.position,
-          { x: 2.7, y: 0.55, z: 21, duration: 0.18 },
-          0.82,
-        )
-        .to(sceneController.cameraTarget, { x: 0, y: 6.2, z: -18, duration: 0.18 }, 0.82)
-        .to(sceneController.world.rotation, { y: -0.08, duration: 0.18 }, 0.82);
+        .addLabel("afterglow", 0.78);
 
       return () => {
         scrollCueTimeline?.kill();
@@ -252,8 +236,38 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 620);
   const cameraPath = new THREE.Group();
   const cameraParallax = new THREE.Group();
-  const cameraTarget = new THREE.Vector3(0, 3.6, -18);
-  cameraPath.position.set(0, 0.7, 24);
+  const motionState = {
+    journey: 0,
+    illumination: 0,
+  };
+  const cameraCurve = new THREE.CatmullRomCurve3(
+    [
+      new THREE.Vector3(0, 0.7, 24),
+      new THREE.Vector3(-0.36, 0.75, 10.5),
+      new THREE.Vector3(-0.08, 1.05, 1.5),
+      new THREE.Vector3(0.34, 2.45, -7.2),
+      new THREE.Vector3(-0.12, 4.2, -10.4),
+      new THREE.Vector3(0.22, 5.25, -12.8),
+    ],
+    false,
+    "centripetal",
+    0.5,
+  );
+  const cameraTargetCurve = new THREE.CatmullRomCurve3(
+    [
+      new THREE.Vector3(0, 3.6, -18),
+      new THREE.Vector3(0, 4.5, -18),
+      new THREE.Vector3(0, 6.1, -18),
+      new THREE.Vector3(0, 9.8, -18.05),
+      new THREE.Vector3(0, 14.2, -18.1),
+      new THREE.Vector3(0, 21.5, -18.2),
+    ],
+    false,
+    "centripetal",
+    0.5,
+  );
+  const cameraTarget = cameraTargetCurve.getPointAt(0);
+  cameraCurve.getPointAt(0, cameraPath.position);
   cameraPath.add(cameraParallax);
   cameraParallax.add(camera);
   scene.add(cameraPath);
@@ -268,6 +282,8 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
 
   const terrainMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
+    emissive: 0x08265d,
+    emissiveIntensity: 0,
     roughness: 1,
     metalness: 0,
     vertexColors: true,
@@ -509,6 +525,7 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
       blending: THREE.AdditiveBlending,
     },
   ];
+  const threadPulse = { value: 0 };
   const treeMaterials = threadLayerDefinitions.map((definition, layerIndex) => {
     const material = new LineMaterial({
       color: 0xc4e8ff,
@@ -522,7 +539,7 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     });
     material.fog = false;
     material.color.multiplyScalar(definition.brightness);
-    configureThreadFade(material);
+    configureThreadFade(material, threadPulse);
     const layer = new LineSegments2(threadGeometry, material);
     layer.renderOrder = layerIndex + 1;
     world.add(layer);
@@ -554,6 +571,16 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   const baseWorld = new THREE.Vector3();
   const cameraLookMatrix = new THREE.Matrix4();
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const lightPulseState = { value: 0 };
+  const lightPulseTimeline = reducedMotion
+    ? null
+    : gsap
+        .timeline({ repeat: -1, yoyo: true })
+        .to(lightPulseState, {
+          value: 1,
+          duration: 1.65,
+          ease: "sine.inOut",
+        });
   const starDriftTimeline = reducedMotion
     ? null
     : gsap.to(starMaterial.uniforms.driftTime, {
@@ -610,6 +637,8 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     }
 
     pointerCurrent.lerp(pointer, reducedMotion ? 1 : 0.045);
+    cameraCurve.getPointAt(motionState.journey, cameraPath.position);
+    cameraTargetCurve.getPointAt(motionState.journey, cameraTarget);
     cameraLookMatrix.lookAt(cameraPath.position, cameraTarget, cameraPath.up);
     cameraPath.quaternion.setFromRotationMatrix(cameraLookMatrix);
 
@@ -632,10 +661,25 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     }
 
     const timeSeconds = time * 0.001;
+    const illumination = motionState.illumination;
+    const lightPulse = lightPulseState.value * illumination;
     terrainMotion.time.value = timeSeconds;
     terrainMotion.strength.value = tremorCurrent;
     coreLight.intensity =
-      9 + tremorCurrent * (2 + Math.sin(timeSeconds * 15.5) * 1.2);
+      9 +
+      illumination * 18 +
+      lightPulse * 9 +
+      tremorCurrent * (2 + Math.sin(timeSeconds * 15.5) * 1.2);
+    coreLight.distance = 30 + illumination * 32;
+    terrainMaterial.emissiveIntensity = illumination * 0.2 + lightPulse * 0.07;
+    moonLight.intensity = 1.65 + illumination * 1.4 + lightPulse * 0.22;
+    renderer.toneMappingExposure = 1.04 + illumination * 0.28 + lightPulse * 0.07;
+    bloom.strength = 0.62 + illumination * 0.44 + lightPulse * 0.12;
+    threadPulse.value = illumination * 0.1 + lightPulse * 0.42;
+    starMaterial.uniforms.pointOpacity.value =
+      0.62 + illumination * 0.12 + lightPulse * 0.045;
+    starMaterial.uniforms.pointSize.value =
+      2.1 + illumination * 0.65 + lightPulse * 0.24;
 
     composer.render();
   };
@@ -648,14 +692,12 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   animationFrame = requestAnimationFrame(render);
 
   return {
-    cameraPath,
-    cameraTarget,
-    world,
+    motionState,
     treeMaterials,
-    bloom,
     dispose: () => {
       disposed = true;
       cancelAnimationFrame(animationFrame);
+      lightPulseTimeline?.kill();
       starDriftTimeline?.kill();
       window.removeEventListener("resize", updateSize);
       window.removeEventListener("pointermove", onPointerMove);
@@ -1106,8 +1148,12 @@ function createSoftPointMaterial(
   });
 }
 
-function configureThreadFade(material: LineMaterial) {
+function configureThreadFade(
+  material: LineMaterial,
+  pulse: { value: number },
+) {
   material.onBeforeCompile = (shader) => {
+    shader.uniforms.threadPulse = pulse;
     shader.vertexShader = `
       varying float vThreadDistance;
       ${shader.vertexShader}
@@ -1126,16 +1172,28 @@ function configureThreadFade(material: LineMaterial) {
     );
     shader.fragmentShader = `
       varying float vThreadDistance;
+      uniform float threadPulse;
       ${shader.fragmentShader}
-    `.replace(
-      "float alpha = opacity;",
-      `
-        float terminalFade = 1.0 - smoothstep(105.0, 280.0, vThreadDistance);
-        float alpha = opacity * terminalFade;
-      `,
-    );
+    `
+      .replace(
+        "float alpha = opacity;",
+        `
+          float terminalFade = 1.0 - smoothstep(105.0, 280.0, vThreadDistance);
+          float alpha = opacity * terminalFade * (1.0 + threadPulse);
+        `,
+      )
+      .replace(
+        "#include <clipping_planes_fragment>",
+        `
+          #include <clipping_planes_fragment>
+
+          #ifndef WORLD_UNITS
+            if (abs(vUv.y) > 0.999) discard;
+          #endif
+        `,
+      );
   };
-  material.customProgramCacheKey = () => "coordinate-thread-distance-fade-v1";
+  material.customProgramCacheKey = () => "coordinate-thread-distance-fade-v3";
 }
 
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {
@@ -1157,20 +1215,28 @@ function mulberry32(seed: number) {
 
 function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
   const openButton = scope.querySelector<HTMLButtonElement>("[data-dialog-open]");
-  const dialog = scope.querySelector<HTMLDialogElement>("[data-coordinate-dialog]");
+  const dialog = scope.querySelector<HTMLElement>("[data-coordinate-dialog]");
   const veil = dialog?.querySelector<HTMLElement>("[data-dialog-veil]");
   const panel = dialog?.querySelector<HTMLElement>("[data-dialog-panel]");
+  const grain = dialog?.querySelector<HTMLElement>("[data-dialog-grain]");
   const content = dialog?.querySelector<HTMLElement>("[data-dialog-content]");
   const closeButton = dialog?.querySelector<HTMLButtonElement>("[data-dialog-close]");
 
-  if (!openButton || !dialog || !veil || !panel || !content || !closeButton) {
+  if (
+    !openButton ||
+    !dialog ||
+    !veil ||
+    !panel ||
+    !grain ||
+    !content ||
+    !closeButton
+  ) {
     return;
   }
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let activeTimeline: gsap.core.Timeline | null = null;
-  let previousHtmlOverflow = "";
-  let previousBodyOverflow = "";
+  let grainDriftTimeline: gsap.core.Timeline | null = null;
 
   const getOriginClip = () => {
     const rect = openButton.getBoundingClientRect();
@@ -1181,31 +1247,48 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
     return `inset(${top}px ${right}px ${bottom}px ${left}px round 2px)`;
   };
 
-  const lockScroll = () => {
-    previousHtmlOverflow = document.documentElement.style.overflow;
-    previousBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-  };
-
-  const unlockScroll = () => {
-    document.documentElement.style.overflow = previousHtmlOverflow;
-    document.body.style.overflow = previousBodyOverflow;
-  };
-
   const finishClose = () => {
-    dialog.close();
-    unlockScroll();
-    gsap.set([dialog, veil, panel, content], { clearProps: "all" });
+    dialog.hidden = true;
+    gsap.set([dialog, veil, panel, grain, content], { clearProps: "all" });
     openButton.focus();
   };
 
+  const startGrainDrift = () => {
+    if (reducedMotion) {
+      return;
+    }
+
+    grainDriftTimeline?.kill();
+    grainDriftTimeline = gsap
+      .timeline({ repeat: -1 })
+      .to(grain, {
+        xPercent: 1.2,
+        yPercent: -0.65,
+        duration: 6.4,
+        ease: "sine.inOut",
+      })
+      .to(grain, {
+        xPercent: 0.35,
+        yPercent: 1.1,
+        duration: 7.1,
+        ease: "sine.inOut",
+      })
+      .to(grain, {
+        xPercent: -1.4,
+        yPercent: -1.1,
+        duration: 7.8,
+        ease: "sine.inOut",
+      });
+  };
+
   const closeDialog = () => {
-    if (!dialog.open) {
+    if (dialog.hidden) {
       return;
     }
 
     activeTimeline?.kill();
+    grainDriftTimeline?.kill();
+    grainDriftTimeline = null;
     const duration = reducedMotion ? 0.01 : 0.62;
     activeTimeline = gsap
       .timeline({ onComplete: finishClose })
@@ -1226,36 +1309,69 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
         },
         0.04,
       )
-      .to(veil, { autoAlpha: 0, duration: duration * 0.72, ease: "power2.in" }, 0.05);
+      .to(
+        grain,
+        {
+          autoAlpha: 0,
+          scale: reducedMotion ? 1 : 1.075,
+          duration: reducedMotion ? 0.01 : 0.28,
+          ease: "power2.in",
+        },
+        0,
+      )
+      .to(
+        veil,
+        {
+          autoAlpha: 0,
+          duration: duration * 0.72,
+          ease: "power2.in",
+        },
+        0.05,
+      );
   };
 
   const openDialog = () => {
-    if (dialog.open) {
+    if (!dialog.hidden) {
       return;
     }
 
     activeTimeline?.kill();
-    lockScroll();
-    dialog.showModal();
+    dialog.hidden = false;
     const duration = reducedMotion ? 0.01 : 0.78;
 
     gsap.set(dialog, { autoAlpha: 1 });
     gsap.set(veil, { autoAlpha: 0 });
     gsap.set(panel, {
       clipPath: reducedMotion ? "inset(0px)" : getOriginClip(),
-      filter: reducedMotion ? "none" : "blur(5px)",
+      filter: reducedMotion ? "none" : "blur(9px)",
       willChange: "clip-path, filter",
+    });
+    gsap.set(grain, {
+      autoAlpha: reducedMotion ? 0.1 : 0,
+      xPercent: reducedMotion ? 0 : -1.4,
+      yPercent: reducedMotion ? 0 : -1.1,
+      scale: reducedMotion ? 1.04 : 1.075,
+      willChange: reducedMotion ? "auto" : "transform, opacity",
     });
     gsap.set(content.children, { autoAlpha: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 24 });
 
     activeTimeline = gsap
       .timeline({
         onComplete: () => {
-          gsap.set(panel, { clearProps: "willChange" });
+          gsap.set(panel, { clearProps: "clipPath,filter,willChange" });
+          startGrainDrift();
           closeButton.focus();
         },
       })
-      .to(veil, { autoAlpha: 1, duration: duration * 0.65, ease: "power2.out" }, 0)
+      .to(
+        veil,
+        {
+          autoAlpha: 1,
+          duration: duration * 0.86,
+          ease: "power2.out",
+        },
+        0,
+      )
       .to(
         panel,
         {
@@ -1265,6 +1381,18 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
           ease: "power4.inOut",
         },
         0,
+      )
+      .to(
+        grain,
+        {
+          autoAlpha: 0.12,
+          xPercent: 0,
+          yPercent: 0,
+          scale: 1.04,
+          duration: reducedMotion ? 0.01 : duration * 0.82,
+          ease: "power2.out",
+        },
+        reducedMotion ? 0 : 0.08,
       )
       .to(
         content.children,
@@ -1279,14 +1407,16 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
       );
   };
 
-  const onCancel = (event: Event) => {
-    event.preventDefault();
-    closeDialog();
-  };
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Escape" && dialog.open) {
+    if (event.key === "Escape" && !dialog.hidden) {
       event.preventDefault();
       closeDialog();
+      return;
+    }
+
+    if (event.key === "Tab" && !dialog.hidden) {
+      event.preventDefault();
+      closeButton.focus();
     }
   };
   const onVeilClick = () => closeDialog();
@@ -1294,19 +1424,17 @@ function setupAboutDialog(scope: HTMLElement, cleanups: Array<() => void>) {
   openButton.addEventListener("click", openDialog);
   closeButton.addEventListener("click", closeDialog);
   veil.addEventListener("click", onVeilClick);
-  dialog.addEventListener("cancel", onCancel);
   document.addEventListener("keydown", onKeyDown);
 
   cleanups.push(() => {
     activeTimeline?.kill();
+    grainDriftTimeline?.kill();
     openButton.removeEventListener("click", openDialog);
     closeButton.removeEventListener("click", closeDialog);
     veil.removeEventListener("click", onVeilClick);
-    dialog.removeEventListener("cancel", onCancel);
     document.removeEventListener("keydown", onKeyDown);
-    if (dialog.open) {
-      dialog.close();
-      unlockScroll();
+    if (!dialog.hidden) {
+      dialog.hidden = true;
     }
   });
 }

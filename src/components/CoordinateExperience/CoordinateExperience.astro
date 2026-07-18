@@ -55,15 +55,19 @@ import "./CoordinateExperience.css";
       <button type="button" data-dialog-open="about-dialog">About</button>
     </nav>
 
-    <dialog
+    <div
       class="coordinate-dialog"
       id="about-dialog"
       data-coordinate-dialog
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="about-title"
       aria-describedby="about-description"
+      hidden
     >
       <div class="coordinate-dialog__veil" data-dialog-veil aria-hidden="true"></div>
       <div class="coordinate-dialog__panel" data-dialog-panel>
+        <div class="coordinate-dialog__grain" data-dialog-grain aria-hidden="true"></div>
         <button
           class="coordinate-dialog__close"
           type="button"
@@ -95,7 +99,7 @@ import "./CoordinateExperience.css";
           <p class="coordinate-dialog__meta">A hackathon project built with Astro, Three.js, and GSAP.</p>
         </div>
       </div>
-    </dialog>
+    </div>
 
     <noscript>
       <p class="coordinate-fallback">
