@@ -40,40 +40,40 @@
 }
 
 .coordinate-experience[data-coordinate-theme="light"] {
-  --experience-background: #4a391f;
-  --stage-background: #81765d;
-  --stage-ink: #2a1905;
-  --stage-muted: rgba(47, 30, 8, 0.68);
-  --stage-faint: rgba(62, 40, 11, 0.34);
-  --canvas-filter: blur(0.65px) saturate(0.82) contrast(1.15);
+  --experience-background: #bda86f;
+  --stage-background: #d9cda7;
+  --stage-ink: #0b0a08;
+  --stage-muted: rgba(15, 14, 10, 0.68);
+  --stage-faint: rgba(23, 21, 15, 0.34);
+  --canvas-filter: blur(0.65px) saturate(0.9) contrast(1.08);
   --atmosphere-background:
-    radial-gradient(circle at 54% 65%, transparent 0 17%, rgba(90, 57, 13, 0.035) 45%, rgba(59, 37, 9, 0.18) 100%),
-    linear-gradient(90deg, rgba(73, 45, 10, 0.14), transparent 36% 72%, rgba(73, 45, 10, 0.08));
+    radial-gradient(circle at 54% 65%, transparent 0 20%, rgba(70, 55, 22, 0.018) 52%, rgba(50, 40, 18, 0.075) 100%),
+    linear-gradient(90deg, rgba(57, 44, 17, 0.045), transparent 36% 72%, rgba(57, 44, 17, 0.025));
   --warp-core: rgba(255, 248, 216, 0.24);
   --warp-mid: rgba(183, 131, 43, 0.1);
-  --warp-ring: rgba(84, 54, 13, 0.38);
-  --loader-background: #99865f;
-  --loader-track: rgba(71, 45, 10, 0.16);
-  --loader-fill: #3a2408;
-  --chapter-ink: rgba(42, 26, 7, 0.88);
-  --whisper-ink: rgba(49, 32, 10, 0.72);
-  --cue-ink: rgba(48, 30, 8, 0.72);
-  --cue-strong: #2b1a05;
-  --progress-track: rgba(60, 38, 10, 0.2);
-  --progress-fill: rgba(48, 30, 8, 0.86);
-  --control-ink: rgba(48, 30, 8, 0.66);
-  --control-strong: #211304;
+  --warp-ring: rgba(42, 34, 17, 0.38);
+  --loader-background: #ded1a9;
+  --loader-track: rgba(18, 16, 11, 0.16);
+  --loader-fill: #0d0c09;
+  --chapter-ink: rgba(12, 11, 8, 0.9);
+  --whisper-ink: rgba(18, 16, 11, 0.74);
+  --cue-ink: rgba(16, 15, 10, 0.74);
+  --cue-strong: #0d0c09;
+  --progress-track: rgba(17, 15, 10, 0.2);
+  --progress-fill: rgba(12, 11, 8, 0.88);
+  --control-ink: rgba(15, 14, 10, 0.68);
+  --control-strong: #090806;
   --rewind-hover: #855816;
-  --final-shadow: 0 1px 18px rgba(255, 248, 217, 0.5);
+  --final-shadow: 0 1px 18px rgba(255, 250, 225, 0.38);
   --dialog-panel: rgba(255, 249, 225, 0.035);
-  --dialog-shadow: inset 0 0 8rem rgba(79, 48, 8, 0.06);
+  --dialog-shadow: inset 0 0 8rem rgba(49, 40, 18, 0.05);
   --dialog-content-shadow: 0 2px 18px rgba(255, 249, 225, 0.76);
-  --dialog-copy: rgba(48, 30, 8, 0.8);
+  --dialog-copy: rgba(14, 13, 9, 0.82);
   --dialog-copy-shadow: 0 1px 8px rgba(255, 249, 225, 0.62);
-  --dialog-meta: rgba(59, 38, 11, 0.58);
-  --dialog-close-background: rgba(56, 35, 8, 0.09);
-  --dialog-close-hover: rgba(56, 35, 8, 0.15);
-  --dialog-close-ink: rgba(43, 26, 6, 0.86);
+  --dialog-meta: rgba(20, 18, 12, 0.6);
+  --dialog-close-background: rgba(14, 13, 9, 0.09);
+  --dialog-close-hover: rgba(14, 13, 9, 0.15);
+  --dialog-close-ink: rgba(10, 9, 7, 0.88);
   color-scheme: light;
 }
 
@@ -105,6 +105,34 @@
   z-index: 1;
   pointer-events: none;
   background: var(--atmosphere-background);
+}
+
+.coordinate-theme-strike {
+  position: absolute;
+  inset: -12% -18%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 50% 54%,
+      rgba(255, 255, 255, 0.94) 0,
+      rgba(232, 239, 242, 0.56) 10%,
+      rgba(191, 202, 209, 0.18) 28%,
+      transparent 62%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 42%,
+      rgba(227, 236, 241, 0.16) 47%,
+      rgba(255, 255, 255, 0.92) 50%,
+      rgba(227, 236, 241, 0.16) 53%,
+      transparent 58%
+    );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: scaleX(0.08);
+  visibility: hidden;
+  will-change: opacity, filter, transform;
 }
 
 .coordinate-time-warp {

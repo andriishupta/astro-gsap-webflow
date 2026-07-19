@@ -70,18 +70,18 @@ const SCENE_PALETTES = {
     duneFaces: [0x0a2b63, 0x0c306b, 0x0e3573, 0x103a7a],
   },
   light: {
-    background: 0x81765d,
-    fog: 0x99865f,
-    hemisphereSky: 0xd5b66f,
-    hemisphereGround: 0x2b1b08,
-    keyLight: 0xe7bd61,
-    terrainEmissive: 0x55420e,
+    background: 0xd9cda7,
+    fog: 0xe4d8b1,
+    hemisphereSky: 0xf4e6b9,
+    hemisphereGround: 0x6b5126,
+    keyLight: 0xffdfa0,
+    terrainEmissive: 0x75591e,
     core: 0x24170d,
     thread: 0x17110b,
-    star: 0xffdfa0,
-    terrainShadow: 0x211607,
-    terrainHighlight: 0xd2ad52,
-    duneFaces: [0x2a1b08, 0x44300e, 0x6a4e18, 0x98762d],
+    star: 0xe6d39d,
+    terrainShadow: 0x5d4517,
+    terrainHighlight: 0xe2c06b,
+    duneFaces: [0x73551c, 0x8d6b27, 0xab8739, 0xc4a052],
   },
 } as const;
 
@@ -119,6 +119,9 @@ async function initExperience(experience: HTMLElement) {
   const loaderLabel = experience.querySelector<HTMLElement>("[data-loader-label]");
   const loaderLine = experience.querySelector<HTMLElement>("[data-loader-line]");
   const atmosphere = experience.querySelector<HTMLElement>(".coordinate-atmosphere");
+  const themeStrike = experience.querySelector<HTMLElement>(
+    "[data-coordinate-theme-strike]",
+  );
   const intro = experience.querySelector<HTMLElement>("[data-coordinate-intro]");
   const scrollCue = experience.querySelector<HTMLElement>("[data-coordinate-scroll-cue]");
   const scrollWheel = experience.querySelector<HTMLElement>("[data-coordinate-scroll-wheel]");
@@ -149,6 +152,7 @@ async function initExperience(experience: HTMLElement) {
     !loaderLabel ||
     !loaderLine ||
     !atmosphere ||
+    !themeStrike ||
     !intro ||
     !scrollCue ||
     !progress ||
@@ -182,49 +186,49 @@ async function initExperience(experience: HTMLElement) {
     let themeLockedForRewind = false;
     const themeEase = gsap.parseEase("power2.inOut");
     const uiThemeColors = {
-      stageInk: createThemeColorInterpolator("#f7fbff", "#7f8489", "#2a1905"),
+      stageInk: createThemeColorInterpolator("#f7fbff", "#7f8489", "#0b0a08"),
       stageMuted: createThemeColorInterpolator(
         "rgba(223, 237, 255, 0.66)",
         "rgba(126, 131, 136, 0.67)",
-        "rgba(47, 30, 8, 0.68)",
+        "rgba(15, 14, 10, 0.68)",
       ),
       stageFaint: createThemeColorInterpolator(
         "rgba(197, 222, 255, 0.32)",
         "rgba(120, 125, 130, 0.33)",
-        "rgba(62, 40, 11, 0.34)",
+        "rgba(23, 21, 15, 0.34)",
       ),
       chapterInk: createThemeColorInterpolator(
         "rgba(245, 250, 255, 0.86)",
         "rgba(128, 133, 138, 0.87)",
-        "rgba(42, 26, 7, 0.88)",
+        "rgba(12, 11, 8, 0.9)",
       ),
       whisperInk: createThemeColorInterpolator(
         "rgba(226, 241, 255, 0.7)",
         "rgba(126, 131, 136, 0.71)",
-        "rgba(49, 32, 10, 0.72)",
+        "rgba(18, 16, 11, 0.74)",
       ),
       cueInk: createThemeColorInterpolator(
         "rgba(226, 240, 255, 0.72)",
         "rgba(126, 131, 136, 0.72)",
-        "rgba(48, 30, 8, 0.72)",
+        "rgba(16, 15, 10, 0.74)",
       ),
-      cueStrong: createThemeColorInterpolator("#eef8ff", "#82878c", "#2b1a05"),
+      cueStrong: createThemeColorInterpolator("#eef8ff", "#82878c", "#0d0c09"),
       progressTrack: createThemeColorInterpolator(
         "rgba(204, 228, 255, 0.18)",
         "rgba(118, 123, 128, 0.19)",
-        "rgba(60, 38, 10, 0.2)",
+        "rgba(17, 15, 10, 0.2)",
       ),
       progressFill: createThemeColorInterpolator(
         "rgba(229, 244, 255, 0.88)",
         "rgba(128, 133, 138, 0.87)",
-        "rgba(48, 30, 8, 0.86)",
+        "rgba(12, 11, 8, 0.88)",
       ),
       controlInk: createThemeColorInterpolator(
         "rgba(226, 240, 255, 0.62)",
         "rgba(123, 128, 133, 0.64)",
-        "rgba(48, 30, 8, 0.66)",
+        "rgba(15, 14, 10, 0.68)",
       ),
-      controlStrong: createThemeColorInterpolator("#ffffff", "#7f8489", "#211304"),
+      controlStrong: createThemeColorInterpolator("#ffffff", "#7f8489", "#090806"),
       rewindHover: createThemeColorInterpolator("#06366e", "#70757a", "#855816"),
     };
     const applyThemeMix = (mix: number) => {
@@ -249,7 +253,21 @@ async function initExperience(experience: HTMLElement) {
         "--rewind-hover": uiThemeColors.rewindHover(clampedMix),
       });
       gsap.set(canvas, {
-        filter: `blur(${THREE.MathUtils.lerp(0.75, 0.65, clampedMix)}px) saturate(${THREE.MathUtils.lerp(0.88, 0.82, clampedMix)}) contrast(${THREE.MathUtils.lerp(1, 1.15, clampedMix)})`,
+        filter: `blur(${THREE.MathUtils.lerp(0.75, 0.65, clampedMix)}px) saturate(${THREE.MathUtils.lerp(0.88, 0.9, clampedMix)}) contrast(${THREE.MathUtils.lerp(1, 1.08, clampedMix)})`,
+      });
+      const strikeStrength = smoothNoiseStep(
+        1 -
+          THREE.MathUtils.clamp(
+            Math.abs(clampedMix - 0.5) / 0.18,
+            0,
+            1,
+          ),
+      );
+      gsap.set(themeStrike, {
+        autoAlpha: strikeStrength * 0.9,
+        scaleX: THREE.MathUtils.lerp(0.08, 1.08, strikeStrength),
+        scaleY: THREE.MathUtils.lerp(0.94, 1, strikeStrength),
+        filter: `blur(${THREE.MathUtils.lerp(22, 5, strikeStrength)}px)`,
       });
     };
     const updateThemeJourney = (scrollProgress: number) => {
@@ -1167,8 +1185,6 @@ function createScene(
       new THREE.Color(lightPalette.star),
     ],
   } as const;
-  const lightAfterglowBackground = new THREE.Color(0x29251f);
-  const lightAfterglowFog = new THREE.Color(0x373129);
   const duneDarkColors = darkPalette.duneFaces.map(
     (color) => new THREE.Color(color),
   );
@@ -1176,7 +1192,6 @@ function createScene(
     (color) => new THREE.Color(color),
   );
   let lastAppliedThemeMix = -1;
-  let lastAppliedLightDarkening = -1;
   let animationFrame = 0;
   let visible = !document.hidden;
   let disposed = false;
@@ -1268,26 +1283,17 @@ function createScene(
       threadGeometry.instanceCount = nextVisibleThreadSegmentCount;
       visibleThreadSegmentCount = nextVisibleThreadSegmentCount;
     }
-    const lightDarkening = themeMix * afterglow;
-    if (
-      Math.abs(themeMix - lastAppliedThemeMix) > 0.0001 ||
-      Math.abs(lightDarkening - lastAppliedLightDarkening) > 0.0001
-    ) {
+    if (Math.abs(themeMix - lastAppliedThemeMix) > 0.0001) {
       interpolateThemeColor(
         sceneBackground,
         paletteColors.background,
         themeMix,
-      );
-      sceneBackground.lerp(
-        lightAfterglowBackground,
-        lightDarkening * 0.72,
       );
       interpolateThemeColor(
         sceneFog.color,
         paletteColors.fog,
         themeMix,
       );
-      sceneFog.color.lerp(lightAfterglowFog, lightDarkening * 0.58);
       sceneFog.density = THREE.MathUtils.lerp(0.0215, 0.0115, themeMix);
       interpolateThemeColor(
         hemisphereLight.color,
@@ -1299,7 +1305,7 @@ function createScene(
         paletteColors.hemisphereGround,
         themeMix,
       );
-      hemisphereLight.intensity = THREE.MathUtils.lerp(0.54, 0.48, themeMix);
+      hemisphereLight.intensity = THREE.MathUtils.lerp(0.54, 0.72, themeMix);
       interpolateThemeColor(
         moonLight.color,
         paletteColors.keyLight,
@@ -1346,7 +1352,6 @@ function createScene(
 
       threadTheme.value = themeMix;
       lastAppliedThemeMix = themeMix;
-      lastAppliedLightDarkening = lightDarkening;
     }
 
     terrainMotion.time.value = timeSeconds;
@@ -1389,25 +1394,18 @@ function createScene(
       lightPulse * 0.22 +
       afterglow * 0.8 +
       afterglowPulse * 0.65;
-    const lightKeyLightIntensity = Math.max(
-      0.72,
-      2.3 -
-        illumination * 0.52 -
-        lightPulse * 0.12 -
-        afterglow * 0.58 -
-        afterglowPulse * 0.22,
-    );
+    const lightKeyLightIntensity = 2.35;
     moonLight.intensity = THREE.MathUtils.lerp(
       darkKeyLightIntensity,
       lightKeyLightIntensity,
       themeMix,
     );
     renderer.toneMappingExposure =
-      THREE.MathUtils.lerp(1.04, 0.62, themeMix) +
-      illumination * THREE.MathUtils.lerp(0.28, -0.12, themeMix) +
-      lightPulse * THREE.MathUtils.lerp(0.07, -0.04, themeMix) +
-      afterglow * THREE.MathUtils.lerp(0.18, -0.14, themeMix) +
-      afterglowPulse * THREE.MathUtils.lerp(0.2, -0.08, themeMix);
+      THREE.MathUtils.lerp(1.04, 0.72, themeMix) +
+      illumination * THREE.MathUtils.lerp(0.28, 0, themeMix) +
+      lightPulse * THREE.MathUtils.lerp(0.07, 0, themeMix) +
+      afterglow * THREE.MathUtils.lerp(0.18, 0, themeMix) +
+      afterglowPulse * THREE.MathUtils.lerp(0.2, 0, themeMix);
     bloom.strength =
       THREE.MathUtils.lerp(0.62, 0.04, themeMix) +
       illumination * THREE.MathUtils.lerp(0.44, 0.02, themeMix) +
