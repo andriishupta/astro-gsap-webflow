@@ -6,6 +6,20 @@ import "./CoordinateExperience.css";
   <section class="coordinate-stage" aria-label="Cathedral of Threads interactive scene">
     <canvas class="coordinate-canvas" data-coordinate-canvas aria-hidden="true"></canvas>
     <div class="coordinate-atmosphere" aria-hidden="true"></div>
+    <div class="coordinate-time-warp" data-time-warp aria-hidden="true">
+      <span
+        class="coordinate-time-warp__ring coordinate-time-warp__ring--outer"
+        data-time-warp-ring
+      ></span>
+      <span
+        class="coordinate-time-warp__ring coordinate-time-warp__ring--middle"
+        data-time-warp-ring
+      ></span>
+      <span
+        class="coordinate-time-warp__ring coordinate-time-warp__ring--inner"
+        data-time-warp-ring
+      ></span>
+    </div>
 
     <div class="coordinate-loader" data-coordinate-loader role="status" aria-live="polite">
       <div class="coordinate-loader__content">
@@ -29,12 +43,48 @@ import "./CoordinateExperience.css";
         <p class="coordinate-chapter" data-coordinate-chapter="approach">
           Follow what remembers.
         </p>
+        <p
+          class="coordinate-whisper coordinate-whisper--origin"
+          data-coordinate-whisper="origin"
+        >
+          A thousand lives. One shared echo.
+        </p>
         <p class="coordinate-chapter" data-coordinate-chapter="convergence">
           Every path remembers.
         </p>
-        <p class="coordinate-chapter coordinate-chapter--final" data-coordinate-chapter="afterglow">
-          Nothing is ever truly lost.
+        <p
+          class="coordinate-whisper coordinate-whisper--distance"
+          data-coordinate-whisper="distance"
+        >
+          Distance bends where memory gathers.
         </p>
+        <p
+          class="coordinate-whisper coordinate-whisper--return"
+          data-coordinate-whisper="return"
+        >
+          The way forward remembers the way back.
+        </p>
+        <div class="coordinate-chapter-anchor coordinate-chapter-anchor--final">
+          <button
+            class="coordinate-chapter coordinate-chapter--final"
+            type="button"
+            data-coordinate-chapter="afterglow"
+            data-time-rewind
+            aria-label="Rewind the experience to the beginning"
+          >
+            <span class="coordinate-rewind__label" data-time-rewind-label>
+              Nothing is ever truly lost.
+            </span>
+            <span class="coordinate-rewind__hint" data-time-rewind-hint aria-hidden="true">
+              <span
+                class="coordinate-rewind__rule"
+                data-time-rewind-rule
+                aria-hidden="true"
+              ></span>
+              Rewind the thread
+            </span>
+          </button>
+        </div>
       </div>
 
       <div class="coordinate-scroll-cue" data-coordinate-scroll-cue>

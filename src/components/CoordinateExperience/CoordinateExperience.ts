@@ -11,6 +11,7 @@ type SceneController = {
   motionState: {
     journey: number;
     illumination: number;
+    afterglow: number;
   };
   treeMaterials: LineMaterial[];
   dispose: () => void;
@@ -34,6 +35,17 @@ type TerrainLayerDefinition = {
   depthSegments: number;
 };
 
+type TimeRewindOptions = {
+  experience: HTMLElement;
+  button: HTMLButtonElement;
+  label: HTMLElement;
+  hint: HTMLElement;
+  index: HTMLElement | null;
+  rule: HTMLElement;
+  timeWarp: HTMLElement;
+  scrollTimeline: gsap.core.Timeline;
+};
+
 const root = document.querySelector<HTMLElement>("[data-coordinate-experience]");
 
 if (root) {
@@ -45,11 +57,17 @@ async function initExperience(experience: HTMLElement) {
   const loader = experience.querySelector<HTMLElement>("[data-coordinate-loader]");
   const loaderLabel = experience.querySelector<HTMLElement>("[data-loader-label]");
   const loaderLine = experience.querySelector<HTMLElement>("[data-loader-line]");
+  const atmosphere = experience.querySelector<HTMLElement>(".coordinate-atmosphere");
   const intro = experience.querySelector<HTMLElement>("[data-coordinate-intro]");
   const scrollCue = experience.querySelector<HTMLElement>("[data-coordinate-scroll-cue]");
   const scrollWheel = experience.querySelector<HTMLElement>("[data-coordinate-scroll-wheel]");
   const progress = experience.querySelector<HTMLElement>("[data-coordinate-progress]");
   const index = experience.querySelector<HTMLElement>("[data-coordinate-index]");
+  const whispers = {
+    origin: experience.querySelector<HTMLElement>('[data-coordinate-whisper="origin"]'),
+    distance: experience.querySelector<HTMLElement>('[data-coordinate-whisper="distance"]'),
+    return: experience.querySelector<HTMLElement>('[data-coordinate-whisper="return"]'),
+  };
   const chapters = {
     approach: experience.querySelector<HTMLElement>('[data-coordinate-chapter="approach"]'),
     convergence: experience.querySelector<HTMLElement>(
@@ -57,18 +75,32 @@ async function initExperience(experience: HTMLElement) {
     ),
     afterglow: experience.querySelector<HTMLElement>('[data-coordinate-chapter="afterglow"]'),
   };
+  const rewindButton = experience.querySelector<HTMLButtonElement>("[data-time-rewind]");
+  const rewindLabel = experience.querySelector<HTMLElement>("[data-time-rewind-label]");
+  const rewindHint = experience.querySelector<HTMLElement>("[data-time-rewind-hint]");
+  const rewindRule = experience.querySelector<HTMLElement>("[data-time-rewind-rule]");
+  const timeWarp = experience.querySelector<HTMLElement>("[data-time-warp]");
 
   if (
     !canvas ||
     !loader ||
     !loaderLabel ||
     !loaderLine ||
+    !atmosphere ||
     !intro ||
     !scrollCue ||
     !progress ||
+    !whispers.origin ||
+    !whispers.distance ||
+    !whispers.return ||
     !chapters.approach ||
     !chapters.convergence ||
-    !chapters.afterglow
+    !chapters.afterglow ||
+    !rewindButton ||
+    !rewindLabel ||
+    !rewindHint ||
+    !rewindRule ||
+    !timeWarp
   ) {
     return;
   }
@@ -151,39 +183,205 @@ async function initExperience(experience: HTMLElement) {
           { illumination: 1, duration: 0.38, ease: "power1.in" },
           0.62,
         )
+        .to(
+          sceneController.motionState,
+          { afterglow: 1, duration: 0.24, ease: "power2.in" },
+          0.76,
+        )
+        .to(atmosphere, { opacity: 0.24, duration: 0.22, ease: "power2.inOut" }, 0.78)
         .to(intro, { autoAlpha: 0, y: -72, scale: 0.92, duration: 0.16 }, 0.04)
         .to(scrollCue, { autoAlpha: 0, y: 22, duration: 0.1 }, 0.03)
         .fromTo(
           chapters.approach,
-          { autoAlpha: 0, y: 32 },
-          { autoAlpha: 1, y: 0, duration: 0.1 },
-          0.16,
+          { autoAlpha: 0, x: -72, y: 22, filter: "blur(10px)" },
+          {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.1,
+            ease: "power3.out",
+          },
+          0.15,
         )
-        .to(chapters.approach, { autoAlpha: 0, y: -24, duration: 0.1 }, 0.29)
+        .to(
+          chapters.approach,
+          {
+            autoAlpha: 0,
+            x: 54,
+            y: -18,
+            filter: "blur(7px)",
+            duration: 0.09,
+            ease: "power2.in",
+          },
+          0.27,
+        )
+        .fromTo(
+          whispers.origin,
+          { autoAlpha: 0, x: 64, y: 18, filter: "blur(8px)" },
+          {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.08,
+            ease: "power3.out",
+          },
+          0.28,
+        )
+        .to(
+          whispers.origin,
+          {
+            autoAlpha: 0,
+            x: -32,
+            y: -14,
+            filter: "blur(6px)",
+            duration: 0.07,
+            ease: "power2.in",
+          },
+          0.37,
+        )
         .addLabel("approach", 0.32)
         .to(sceneController.treeMaterials[0], { opacity: 0.006, duration: 0.28 }, 0.34)
         .to(sceneController.treeMaterials[1], { opacity: 0.0095, duration: 0.28 }, 0.34)
         .to(sceneController.treeMaterials[2], { opacity: 0.0042, duration: 0.28 }, 0.34)
         .fromTo(
           chapters.convergence,
-          { autoAlpha: 0, y: 32 },
-          { autoAlpha: 1, y: 0, duration: 0.1 },
+          { autoAlpha: 0, x: 76, y: 18, filter: "blur(10px)" },
+          {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.1,
+            ease: "power3.out",
+          },
           0.4,
         )
-        .to(chapters.convergence, { autoAlpha: 0, y: -24, duration: 0.1 }, 0.57)
+        .to(
+          chapters.convergence,
+          {
+            autoAlpha: 0,
+            x: -48,
+            y: -24,
+            filter: "blur(8px)",
+            duration: 0.08,
+            ease: "power2.in",
+          },
+          0.53,
+        )
+        .fromTo(
+          whispers.distance,
+          { autoAlpha: 0, y: -24, filter: "blur(8px)", letterSpacing: "0.12em" },
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: "blur(0px)",
+            letterSpacing: "0.025em",
+            duration: 0.08,
+            ease: "power3.out",
+          },
+          0.51,
+        )
+        .to(
+          whispers.distance,
+          {
+            autoAlpha: 0,
+            y: 20,
+            filter: "blur(6px)",
+            duration: 0.07,
+            ease: "power2.in",
+          },
+          0.61,
+        )
         .addLabel("convergence", 0.6)
         .to(sceneController.treeMaterials[0], { opacity: 0.009, duration: 0.36 }, 0.64)
         .to(sceneController.treeMaterials[1], { opacity: 0.014, duration: 0.36 }, 0.64)
         .to(sceneController.treeMaterials[2], { opacity: 0.0064, duration: 0.36 }, 0.64)
         .fromTo(
+          whispers.return,
+          { autoAlpha: 0, x: 72, y: 22, filter: "blur(9px)" },
+          {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.08,
+            ease: "power3.out",
+          },
+          0.62,
+        )
+        .to(
+          whispers.return,
+          {
+            autoAlpha: 0,
+            x: -44,
+            y: -18,
+            filter: "blur(7px)",
+            duration: 0.07,
+            ease: "power2.in",
+          },
+          0.72,
+        )
+        .fromTo(
           chapters.afterglow,
-          { autoAlpha: 0, y: 36 },
-          { autoAlpha: 1, y: 0, duration: 0.12 },
+          {
+            autoAlpha: 0,
+            xPercent: -72,
+            y: 42,
+            color: "rgba(245, 250, 255, 0.92)",
+            filter: "blur(12px)",
+          },
+          {
+            autoAlpha: 1,
+            xPercent: 0,
+            y: 0,
+            color: "rgba(245, 250, 255, 0.92)",
+            filter: "blur(0px)",
+            duration: 0.16,
+            ease: "power4.out",
+          },
           0.7,
+        )
+        .set(chapters.afterglow, { pointerEvents: "auto" }, 0.76)
+        .to(
+          chapters.afterglow,
+          {
+            color: "#020814",
+            scale: 1.025,
+            textShadow: "0 1px 18px rgba(255, 255, 255, 0.36)",
+            duration: 0.2,
+            ease: "power2.inOut",
+          },
+          0.8,
+        )
+        .fromTo(
+          rewindHint,
+          { autoAlpha: 0, y: 12 },
+          { autoAlpha: 0.56, y: 0, duration: 0.11, ease: "power3.out" },
+          0.86,
+        )
+        .fromTo(
+          rewindRule,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.1, ease: "power3.out" },
+          0.88,
         )
         .addLabel("afterglow", 0.78);
 
+      const rewindCleanup = setupTimeRewind({
+        experience,
+        button: rewindButton,
+        label: rewindLabel,
+        hint: rewindHint,
+        index,
+        rule: rewindRule,
+        timeWarp,
+        scrollTimeline,
+      });
+
       return () => {
+        rewindCleanup();
         scrollCueTimeline?.kill();
         scrollTimeline.scrollTrigger?.kill();
         scrollTimeline.kill();
@@ -191,9 +389,17 @@ async function initExperience(experience: HTMLElement) {
     });
 
     motion.add("(prefers-reduced-motion: reduce)", () => {
-      gsap.set([chapters.approach, chapters.convergence, chapters.afterglow], {
-        autoAlpha: 0,
-      });
+      gsap.set(
+        [
+          chapters.approach,
+          chapters.convergence,
+          chapters.afterglow,
+          whispers.origin,
+          whispers.distance,
+          whispers.return,
+        ],
+        { autoAlpha: 0 },
+      );
       gsap.set(scrollCue, { autoAlpha: 0 });
     });
   } catch (error) {
@@ -239,6 +445,7 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   const motionState = {
     journey: 0,
     illumination: 0,
+    afterglow: 0,
   };
   const cameraCurve = new THREE.CatmullRomCurve3(
     [
@@ -670,23 +877,58 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     const timeSeconds = time * 0.001;
     const illumination = motionState.illumination;
     const lightPulse = lightPulseState.value * illumination;
+    const afterglow = motionState.afterglow;
+    const afterglowPulse = lightPulseState.value * afterglow;
     terrainMotion.time.value = timeSeconds;
     terrainMotion.strength.value = tremorCurrent;
     coreLight.intensity =
       9 +
       illumination * 18 +
       lightPulse * 9 +
+      afterglow * 12 +
+      afterglowPulse * 26 +
       tremorCurrent * (2 + Math.sin(timeSeconds * 15.5) * 1.2);
-    coreLight.distance = 30 + illumination * 32;
-    terrainMaterial.emissiveIntensity = illumination * 0.2 + lightPulse * 0.07;
-    moonLight.intensity = 1.65 + illumination * 1.4 + lightPulse * 0.22;
-    renderer.toneMappingExposure = 1.04 + illumination * 0.28 + lightPulse * 0.07;
-    bloom.strength = 0.62 + illumination * 0.44 + lightPulse * 0.12;
-    threadPulse.value = illumination * 0.1 + lightPulse * 0.42;
+    coreLight.distance = 30 + illumination * 32 + afterglow * 18;
+    terrainMaterial.emissiveIntensity =
+      illumination * 0.2 +
+      lightPulse * 0.07 +
+      afterglow * 0.1 +
+      afterglowPulse * 0.14;
+    moonLight.intensity =
+      1.65 +
+      illumination * 1.4 +
+      lightPulse * 0.22 +
+      afterglow * 0.8 +
+      afterglowPulse * 0.65;
+    renderer.toneMappingExposure =
+      1.04 +
+      illumination * 0.28 +
+      lightPulse * 0.07 +
+      afterglow * 0.18 +
+      afterglowPulse * 0.2;
+    bloom.strength =
+      0.62 +
+      illumination * 0.44 +
+      lightPulse * 0.12 +
+      afterglow * 0.18 +
+      afterglowPulse * 0.3;
+    threadPulse.value =
+      illumination * 0.1 +
+      lightPulse * 0.42 +
+      afterglow * 0.12 +
+      afterglowPulse * 0.35;
     starMaterial.uniforms.pointOpacity.value =
-      0.62 + illumination * 0.12 + lightPulse * 0.045;
+      0.62 +
+      illumination * 0.12 +
+      lightPulse * 0.045 +
+      afterglow * 0.08 +
+      afterglowPulse * 0.035;
     starMaterial.uniforms.pointSize.value =
-      2.1 + illumination * 0.65 + lightPulse * 0.24;
+      2.1 +
+      illumination * 0.65 +
+      lightPulse * 0.24 +
+      afterglow * 0.18 +
+      afterglowPulse * 0.12;
 
     composer.render();
   };
@@ -1217,6 +1459,250 @@ function mulberry32(seed: number) {
     value = Math.imul(value ^ (value >>> 15), value | 1);
     value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
     return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
+
+function setupTimeRewind({
+  experience,
+  button,
+  label,
+  hint,
+  index,
+  rule,
+  timeWarp,
+  scrollTimeline,
+}: TimeRewindOptions) {
+  const rings = Array.from(
+    experience.querySelectorAll<HTMLElement>("[data-time-warp-ring]"),
+  );
+  const trigger = scrollTimeline.scrollTrigger;
+  const forwardPlaybackSeconds = 6;
+  const rewindRate = 5;
+  let isRewinding = false;
+  let rewindTimeline: gsap.core.Timeline | null = null;
+
+  const hoverTimeline = gsap
+    .timeline({ paused: true })
+    .to(
+      label,
+      {
+        y: -7,
+        scale: 1.07,
+        color: "#06366e",
+        duration: 0.28,
+        ease: "power4.out",
+      },
+      0,
+    )
+    .to(
+      hint,
+      {
+        autoAlpha: 1,
+        x: 5,
+        color: "#06366e",
+        letterSpacing: "0.34em",
+        duration: 0.22,
+        ease: "power3.out",
+      },
+      0.02,
+    )
+    .to(
+      rule,
+      {
+        scaleX: 1.72,
+        duration: 0.28,
+        ease: "power4.out",
+      },
+      0.02,
+    )
+    .to(
+      timeWarp,
+      {
+        autoAlpha: 0.09,
+        scale: 0.76,
+        duration: 0.28,
+        ease: "power3.out",
+      },
+      0,
+    )
+    .to(
+      rings,
+      {
+        autoAlpha: 0.2,
+        scale: 0.68,
+        duration: 0.32,
+        ease: "power3.out",
+        stagger: 0.035,
+      },
+      0,
+    );
+
+  const playHover = () => {
+    if (!isRewinding) {
+      hoverTimeline.play();
+    }
+  };
+
+  const reverseHover = () => {
+    if (!isRewinding) {
+      hoverTimeline.reverse();
+    }
+  };
+
+  const finishRewind = () => {
+    window.scrollTo(0, 0);
+    scrollTimeline.progress(0).pause();
+    trigger?.enable();
+    ScrollTrigger.update();
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    if (index) {
+      index.textContent = "01";
+    }
+    isRewinding = false;
+    gsap.set([label, hint], { clearProps: "color,letterSpacing,transform" });
+    gsap.set([timeWarp, ...rings], {
+      clearProps: "opacity,visibility,transform",
+    });
+  };
+
+  const rewind = (event: MouseEvent) => {
+    event.preventDefault();
+    if (isRewinding) {
+      return;
+    }
+
+    isRewinding = true;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    hoverTimeline.pause(0);
+    rewindTimeline?.kill();
+    trigger?.disable(false, true);
+    scrollTimeline.pause();
+
+    const scrollableDistance = Math.max(
+      1,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    const scrollProgress = THREE.MathUtils.clamp(
+      window.scrollY / scrollableDistance,
+      0,
+      1,
+    );
+    const rewindDuration = Math.max(
+      0.22,
+      (forwardPlaybackSeconds / rewindRate) * scrollProgress,
+    );
+    const scrollProxy = { y: window.scrollY };
+    const overlayExitAt = Math.max(0.14, rewindDuration - 0.12);
+
+    rewindTimeline = gsap
+      .timeline({ onComplete: finishRewind })
+      .set(timeWarp, {
+        autoAlpha: 0,
+        rotation: -5,
+        scale: 0.5,
+      })
+      .set(rings, {
+        autoAlpha: 0,
+        rotation: (index) => (index % 2 === 0 ? -7 : 7),
+        scale: 0.5,
+      })
+      .to(
+        label,
+        {
+          y: 4,
+          scale: 0.96,
+          duration: 0.12,
+          ease: "power2.in",
+        },
+        0,
+      )
+      .to(
+        timeWarp,
+        {
+          autoAlpha: 0.54,
+          rotation: 2,
+          scale: 1,
+          duration: Math.min(0.34, rewindDuration * 0.42),
+          ease: "power3.in",
+        },
+        0,
+      )
+      .to(
+        rings,
+        {
+          autoAlpha: 0.64,
+          rotation: (index) => (index % 2 === 0 ? 4 : -4),
+          scale: 1.08,
+          duration: Math.min(0.42, rewindDuration * 0.5),
+          ease: "power3.inOut",
+          stagger: 0.035,
+        },
+        0,
+      )
+      .to(
+        scrollProxy,
+        {
+          y: 0,
+          duration: rewindDuration,
+          ease: "power3.inOut",
+          onUpdate: () => window.scrollTo(0, scrollProxy.y),
+        },
+        0.05,
+      )
+      .to(
+        scrollTimeline,
+        {
+          progress: 0,
+          duration: rewindDuration,
+          ease: "power3.inOut",
+        },
+        0.05,
+      )
+      .to(
+        timeWarp,
+        {
+          autoAlpha: 0,
+          rotation: 7,
+          scale: 1.42,
+          duration: 0.28,
+          ease: "power3.out",
+        },
+        overlayExitAt,
+      )
+      .to(
+        rings,
+        {
+          autoAlpha: 0,
+          scale: 1.34,
+          duration: 0.24,
+          ease: "power3.out",
+          stagger: 0.02,
+        },
+        overlayExitAt,
+      );
+  };
+
+  button.addEventListener("mouseenter", playHover);
+  button.addEventListener("mouseleave", reverseHover);
+  button.addEventListener("focus", playHover);
+  button.addEventListener("blur", reverseHover);
+  button.addEventListener("click", rewind);
+
+  return () => {
+    hoverTimeline.kill();
+    rewindTimeline?.kill();
+    if (isRewinding) {
+      trigger?.enable();
+    }
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.removeEventListener("mouseenter", playHover);
+    button.removeEventListener("mouseleave", reverseHover);
+    button.removeEventListener("focus", playHover);
+    button.removeEventListener("blur", reverseHover);
+    button.removeEventListener("click", rewind);
   };
 }
 
