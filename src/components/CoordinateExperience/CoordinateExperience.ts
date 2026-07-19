@@ -12,10 +12,13 @@ type SceneController = {
     journey: number;
     illumination: number;
     afterglow: number;
+    themeMix: number;
   };
   treeMaterials: LineMaterial[];
   dispose: () => void;
 };
+
+type CoordinateTheme = "dark" | "light";
 
 type TerrainProfile = {
   seed: number;
@@ -32,6 +35,8 @@ type TerrainLayerDefinition = {
   ridgeHeight: number;
   shadow: THREE.ColorRepresentation;
   highlight: THREE.ColorRepresentation;
+  lightShadow: THREE.ColorRepresentation;
+  lightHighlight: THREE.ColorRepresentation;
   depthSegments: number;
 };
 
@@ -45,7 +50,52 @@ type TimeRewindOptions = {
   rule: HTMLElement;
   timeWarp: HTMLElement;
   scrollTimeline: gsap.core.Timeline;
+  onRewindStart: () => void;
+  onRewindComplete: () => void;
 };
+
+const SCENE_PALETTES = {
+  dark: {
+    background: 0x051a40,
+    fog: 0x051a40,
+    hemisphereSky: 0x628fd0,
+    hemisphereGround: 0x01030a,
+    keyLight: 0x9ecfff,
+    terrainEmissive: 0x08265d,
+    core: 0xb9e4ff,
+    thread: 0xc4e8ff,
+    star: 0x91c9ff,
+    terrainShadow: 0x02091d,
+    terrainHighlight: 0x2872b5,
+    duneFaces: [0x0a2b63, 0x0c306b, 0x0e3573, 0x103a7a],
+  },
+  light: {
+    background: 0x81765d,
+    fog: 0x99865f,
+    hemisphereSky: 0xd5b66f,
+    hemisphereGround: 0x2b1b08,
+    keyLight: 0xe7bd61,
+    terrainEmissive: 0x55420e,
+    core: 0x24170d,
+    thread: 0x17110b,
+    star: 0xffdfa0,
+    terrainShadow: 0x211607,
+    terrainHighlight: 0xd2ad52,
+    duneFaces: [0x2a1b08, 0x44300e, 0x6a4e18, 0x98762d],
+  },
+} as const;
+
+const TRANSITION_NEUTRALS = {
+  background: 0x565b61,
+  fog: 0x686d73,
+  hemisphereSky: 0x9ba1a8,
+  hemisphereGround: 0x24272b,
+  keyLight: 0xb4bac1,
+  terrainEmissive: 0x34383d,
+  core: 0x858b92,
+  thread: 0x70757b,
+  star: 0x959ba2,
+} as const;
 
 const root = document.querySelector<HTMLElement>("[data-coordinate-experience]");
 
@@ -54,6 +104,16 @@ if (root) {
 }
 
 async function initExperience(experience: HTMLElement) {
+  const themeQuery = window.matchMedia("(prefers-color-scheme: light)");
+  const themeOverride = new URLSearchParams(window.location.search).get("theme");
+  const initialTheme: CoordinateTheme =
+    themeOverride === "dark" || themeOverride === "light"
+      ? themeOverride
+      : themeQuery.matches
+        ? "light"
+        : "dark";
+  experience.dataset.coordinateTheme = initialTheme;
+
   const canvas = experience.querySelector<HTMLCanvasElement>("[data-coordinate-canvas]");
   const loader = experience.querySelector<HTMLElement>("[data-coordinate-loader]");
   const loaderLabel = experience.querySelector<HTMLElement>("[data-loader-label]");
@@ -114,8 +174,115 @@ async function initExperience(experience: HTMLElement) {
   setupAboutDialog(experience, cleanups);
 
   try {
-    const sceneController = createScene(canvas);
+    const sceneController = createScene(canvas, initialTheme);
     cleanups.push(sceneController.dispose);
+    let passageTheme = initialTheme;
+    let destinationTheme: CoordinateTheme =
+      passageTheme === "dark" ? "light" : "dark";
+    let themeLockedForRewind = false;
+    const themeEase = gsap.parseEase("power2.inOut");
+    const uiThemeColors = {
+      stageInk: createThemeColorInterpolator("#f7fbff", "#7f8489", "#2a1905"),
+      stageMuted: createThemeColorInterpolator(
+        "rgba(223, 237, 255, 0.66)",
+        "rgba(126, 131, 136, 0.67)",
+        "rgba(47, 30, 8, 0.68)",
+      ),
+      stageFaint: createThemeColorInterpolator(
+        "rgba(197, 222, 255, 0.32)",
+        "rgba(120, 125, 130, 0.33)",
+        "rgba(62, 40, 11, 0.34)",
+      ),
+      chapterInk: createThemeColorInterpolator(
+        "rgba(245, 250, 255, 0.86)",
+        "rgba(128, 133, 138, 0.87)",
+        "rgba(42, 26, 7, 0.88)",
+      ),
+      whisperInk: createThemeColorInterpolator(
+        "rgba(226, 241, 255, 0.7)",
+        "rgba(126, 131, 136, 0.71)",
+        "rgba(49, 32, 10, 0.72)",
+      ),
+      cueInk: createThemeColorInterpolator(
+        "rgba(226, 240, 255, 0.72)",
+        "rgba(126, 131, 136, 0.72)",
+        "rgba(48, 30, 8, 0.72)",
+      ),
+      cueStrong: createThemeColorInterpolator("#eef8ff", "#82878c", "#2b1a05"),
+      progressTrack: createThemeColorInterpolator(
+        "rgba(204, 228, 255, 0.18)",
+        "rgba(118, 123, 128, 0.19)",
+        "rgba(60, 38, 10, 0.2)",
+      ),
+      progressFill: createThemeColorInterpolator(
+        "rgba(229, 244, 255, 0.88)",
+        "rgba(128, 133, 138, 0.87)",
+        "rgba(48, 30, 8, 0.86)",
+      ),
+      controlInk: createThemeColorInterpolator(
+        "rgba(226, 240, 255, 0.62)",
+        "rgba(123, 128, 133, 0.64)",
+        "rgba(48, 30, 8, 0.66)",
+      ),
+      controlStrong: createThemeColorInterpolator("#ffffff", "#7f8489", "#211304"),
+      rewindHover: createThemeColorInterpolator("#06366e", "#70757a", "#855816"),
+    };
+    const applyThemeMix = (mix: number) => {
+      const clampedMix = THREE.MathUtils.clamp(mix, 0, 1);
+      sceneController.motionState.themeMix = clampedMix;
+      const semanticTheme = clampedMix >= 0.5 ? "light" : "dark";
+      if (experience.dataset.coordinateTheme !== semanticTheme) {
+        experience.dataset.coordinateTheme = semanticTheme;
+      }
+      gsap.set(experience, {
+        "--stage-ink": uiThemeColors.stageInk(clampedMix),
+        "--stage-muted": uiThemeColors.stageMuted(clampedMix),
+        "--stage-faint": uiThemeColors.stageFaint(clampedMix),
+        "--chapter-ink": uiThemeColors.chapterInk(clampedMix),
+        "--whisper-ink": uiThemeColors.whisperInk(clampedMix),
+        "--cue-ink": uiThemeColors.cueInk(clampedMix),
+        "--cue-strong": uiThemeColors.cueStrong(clampedMix),
+        "--progress-track": uiThemeColors.progressTrack(clampedMix),
+        "--progress-fill": uiThemeColors.progressFill(clampedMix),
+        "--control-ink": uiThemeColors.controlInk(clampedMix),
+        "--control-strong": uiThemeColors.controlStrong(clampedMix),
+        "--rewind-hover": uiThemeColors.rewindHover(clampedMix),
+      });
+      gsap.set(canvas, {
+        filter: `blur(${THREE.MathUtils.lerp(0.75, 0.65, clampedMix)}px) saturate(${THREE.MathUtils.lerp(0.88, 0.82, clampedMix)}) contrast(${THREE.MathUtils.lerp(1, 1.15, clampedMix)})`,
+      });
+    };
+    const updateThemeJourney = (scrollProgress: number) => {
+      if (themeLockedForRewind) {
+        return;
+      }
+
+      const transitionProgress = THREE.MathUtils.clamp(
+        (scrollProgress - 0.04) / 0.92,
+        0,
+        1,
+      );
+      const startMix = passageTheme === "light" ? 1 : 0;
+      const endMix = destinationTheme === "light" ? 1 : 0;
+      applyThemeMix(
+        THREE.MathUtils.lerp(
+          startMix,
+          endMix,
+          themeEase(transitionProgress),
+        ),
+      );
+    };
+    const retainCurrentThemeForRewind = () => {
+      themeLockedForRewind = true;
+      passageTheme =
+        sceneController.motionState.themeMix >= 0.5 ? "light" : "dark";
+      destinationTheme = passageTheme === "dark" ? "light" : "dark";
+      applyThemeMix(passageTheme === "light" ? 1 : 0);
+    };
+    const beginNextThemeJourney = () => {
+      applyThemeMix(passageTheme === "light" ? 1 : 0);
+      themeLockedForRewind = false;
+    };
 
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
@@ -164,9 +331,10 @@ async function initExperience(experience: HTMLElement) {
           trigger: experience,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.15,
+          scrub: 1.75,
           invalidateOnRefresh: true,
           onUpdate: ({ progress: scrollProgress }) => {
+            updateThemeJourney(scrollProgress);
             if (index) {
               index.textContent = String(Math.min(4, Math.floor(scrollProgress * 4) + 1)).padStart(
                 2,
@@ -382,6 +550,8 @@ async function initExperience(experience: HTMLElement) {
         rule: rewindRule,
         timeWarp,
         scrollTimeline,
+        onRewindStart: retainCurrentThemeForRewind,
+        onRewindComplete: beginNextThemeJourney,
       });
 
       return () => {
@@ -426,7 +596,13 @@ async function initExperience(experience: HTMLElement) {
   document.addEventListener("astro:before-swap", teardown, { once: true });
 }
 
-function createScene(canvas: HTMLCanvasElement): SceneController {
+function createScene(
+  canvas: HTMLCanvasElement,
+  initialTheme: CoordinateTheme,
+): SceneController {
+  const darkPalette = SCENE_PALETTES.dark;
+  const lightPalette = SCENE_PALETTES.light;
+  const initialThemeMix = initialTheme === "light" ? 1 : 0;
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -440,8 +616,15 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   renderer.toneMappingExposure = 1.04;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x051a40);
-  scene.fog = new THREE.FogExp2(0x051a40, 0.0215);
+  const sceneBackground = new THREE.Color(
+    initialTheme === "light" ? lightPalette.background : darkPalette.background,
+  );
+  const sceneFog = new THREE.FogExp2(
+    initialTheme === "light" ? lightPalette.fog : darkPalette.fog,
+    THREE.MathUtils.lerp(0.0215, 0.0115, initialThemeMix),
+  );
+  scene.background = sceneBackground;
+  scene.fog = sceneFog;
 
   const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 620);
   const cameraPath = new THREE.Group();
@@ -450,6 +633,7 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     journey: 0,
     illumination: 0,
     afterglow: 0,
+    themeMix: initialThemeMix,
   };
   const cameraCurve = new THREE.CatmullRomCurve3(
     [
@@ -486,14 +670,29 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   const world = new THREE.Group();
   scene.add(world);
 
-  scene.add(new THREE.HemisphereLight(0x628fd0, 0x01030a, 0.54));
-  const moonLight = new THREE.DirectionalLight(0x9ecfff, 1.65);
+  const hemisphereLight = new THREE.HemisphereLight(
+    initialTheme === "light"
+      ? lightPalette.hemisphereSky
+      : darkPalette.hemisphereSky,
+    initialTheme === "light"
+      ? lightPalette.hemisphereGround
+      : darkPalette.hemisphereGround,
+    0.54,
+  );
+  scene.add(hemisphereLight);
+  const moonLight = new THREE.DirectionalLight(
+    initialTheme === "light" ? lightPalette.keyLight : darkPalette.keyLight,
+    1.65,
+  );
   moonLight.position.set(-8, 20, 12);
   scene.add(moonLight);
 
   const terrainMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    emissive: 0x08265d,
+    emissive:
+      initialTheme === "light"
+        ? lightPalette.terrainEmissive
+        : darkPalette.terrainEmissive,
     emissiveIntensity: 0,
     roughness: 1,
     metalness: 0,
@@ -503,15 +702,25 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   const terrainMotion = {
     strength: { value: 0 },
     time: { value: 0 },
+    themeMix: { value: initialThemeMix },
   };
   terrainMaterial.onBeforeCompile = (shader) => {
     shader.uniforms.coordinateTremorStrength = terrainMotion.strength;
     shader.uniforms.coordinateTremorTime = terrainMotion.time;
+    shader.uniforms.coordinateThemeMix = terrainMotion.themeMix;
     shader.vertexShader = `
       uniform float coordinateTremorStrength;
       uniform float coordinateTremorTime;
+      attribute vec3 coordinateLightColor;
+      varying vec3 vCoordinateLightColor;
       ${shader.vertexShader}
     `.replace(
+      "void main() {",
+      `
+        void main() {
+          vCoordinateLightColor = coordinateLightColor;
+      `,
+    ).replace(
       "#include <begin_vertex>",
       `
         #include <begin_vertex>
@@ -529,8 +738,23 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
         ) * tremorFalloff * coordinateTremorStrength;
       `,
     );
+    shader.fragmentShader = `
+      uniform float coordinateThemeMix;
+      varying vec3 vCoordinateLightColor;
+      ${shader.fragmentShader}
+    `.replace(
+      "#include <color_fragment>",
+      `
+        #include <color_fragment>
+        diffuseColor.rgb = mix(
+          diffuseColor.rgb,
+          vCoordinateLightColor,
+          coordinateThemeMix
+        );
+      `,
+    );
   };
-  terrainMaterial.customProgramCacheKey = () => "coordinate-terrain-tremor-v3";
+  terrainMaterial.customProgramCacheKey = () => "coordinate-terrain-theme-v4";
 
   const random = mulberry32(731_997);
   const terrainSeed = crypto.getRandomValues(new Uint32Array(1))[0] ?? 731_997;
@@ -542,24 +766,46 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
         depth: 180,
         heightOffset: 0,
         ridgeHeight: 0,
-        shadow: 0x02091d,
-        highlight: 0x2872b5,
+        shadow: darkPalette.terrainShadow,
+        highlight: darkPalette.terrainHighlight,
+        lightShadow: lightPalette.terrainShadow,
+        lightHighlight: lightPalette.terrainHighlight,
         depthSegments: 220,
       },
       terrainProfile,
       terrainMaterial,
     ),
   );
-  world.add(
-    createDuneFace(10, 9, 0x0a2b63, terrainProfile.phaseA, terrainProfile),
-    createDuneFace(-1, 8, 0x0c306b, terrainProfile.phaseB, terrainProfile),
-    createDuneFace(-12, 10, 0x0e3573, terrainProfile.phaseC, terrainProfile),
-    createDuneFace(-34, 14, 0x103a7a, terrainProfile.phaseD, terrainProfile),
+  const duneDefinitions = [
+    { centerZ: 10, depth: 9, phase: terrainProfile.phaseA },
+    { centerZ: -1, depth: 8, phase: terrainProfile.phaseB },
+    { centerZ: -12, depth: 10, phase: terrainProfile.phaseC },
+    { centerZ: -34, depth: 14, phase: terrainProfile.phaseD },
+  ];
+  const duneMeshes = duneDefinitions.map((definition, index) =>
+    createDuneFace(
+      definition.centerZ,
+      definition.depth,
+      darkPalette.duneFaces[index],
+      definition.phase,
+      terrainProfile,
+    ),
   );
+  const duneMaterials = duneMeshes.map(
+    (mesh) => mesh.material as THREE.MeshStandardMaterial,
+  );
+  world.add(...duneMeshes);
 
-  const threadSegments: number[] = [];
+  const baseThreadSegments: number[] = [];
+  const detailCanopyPaths: Float32Array[] = [];
+  const detailFallPaths: Float32Array[] = [];
   const base = new THREE.Vector3(0, terrainHeightAt(0, -18, terrainProfile) + 0.08, -18);
-  const coreLight = new THREE.PointLight(0xb9e4ff, 9, 30, 1.8);
+  const coreLight = new THREE.PointLight(
+    initialTheme === "light" ? lightPalette.core : darkPalette.core,
+    9,
+    30,
+    1.8,
+  );
   coreLight.position.set(base.x, base.y + 1.1, base.z);
   world.add(coreLight);
 
@@ -568,6 +814,7 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
   const smokeSpreadArc = (Math.PI * 2) / 120;
   const angularOffset = random() * Math.PI * 2;
   const intersectionRandom = mulberry32(184_731);
+  const threadLodRandom = mulberry32(913_807);
   const densityAnchorCount = 15;
   const densityAnchors = Array.from(
     { length: densityAnchorCount },
@@ -714,15 +961,54 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
         pathBase,
       );
       const fallingPoints = fallingCurve.getPoints(38);
+      const canopyPath = vectorPath(canopyPoints);
+      const waterfallPath = vectorPath(waterfallPoints);
+      const fallingPath = vectorPath(fallingPoints);
 
-      appendSegments(threadSegments, vectorPath(canopyPoints));
-      appendSegments(threadSegments, vectorPath(waterfallPoints));
-      appendSegments(threadSegments, vectorPath(fallingPoints));
+      if (threadLodRandom() < 0.3) {
+        detailCanopyPaths.push(canopyPath);
+        detailFallPaths.push(waterfallPath, fallingPath);
+      } else {
+        appendSegments(baseThreadSegments, canopyPath);
+        appendSegments(baseThreadSegments, waterfallPath);
+        appendSegments(baseThreadSegments, fallingPath);
+      }
     }
   }
 
+  shuffleInPlace(detailCanopyPaths, threadLodRandom);
+  shuffleInPlace(detailFallPaths, threadLodRandom);
+  const detailCanopySegments: number[] = [];
+  const detailFallSegments: number[] = [];
+  detailCanopyPaths.forEach((path) =>
+    appendSegments(detailCanopySegments, path),
+  );
+  detailFallPaths.forEach((path) =>
+    appendSegments(detailFallSegments, path),
+  );
+  const threadSegments = new Float32Array(
+    baseThreadSegments.length +
+      detailCanopySegments.length +
+      detailFallSegments.length,
+  );
+  threadSegments.set(baseThreadSegments, 0);
+  threadSegments.set(detailCanopySegments, baseThreadSegments.length);
+  threadSegments.set(
+    detailFallSegments,
+    baseThreadSegments.length + detailCanopySegments.length,
+  );
+  const baseThreadSegmentCount = baseThreadSegments.length / 6;
+  const detailCanopySegmentCount = detailCanopySegments.length / 6;
+  const detailFallSegmentCount = detailFallSegments.length / 6;
   const threadGeometry = new LineSegmentsGeometry();
-  threadGeometry.setPositions(new Float32Array(threadSegments));
+  threadGeometry.setPositions(threadSegments);
+  threadGeometry.instanceCount = baseThreadSegmentCount;
+  let visibleThreadSegmentCount = baseThreadSegmentCount;
+  baseThreadSegments.length = 0;
+  detailCanopySegments.length = 0;
+  detailFallSegments.length = 0;
+  detailCanopyPaths.length = 0;
+  detailFallPaths.length = 0;
   const threadLayerDefinitions = [
     {
       linewidth: 8.2,
@@ -744,9 +1030,32 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     },
   ];
   const threadPulse = { value: 0 };
+  const threadTheme = { value: initialThemeMix };
+  const threadDarkColors = threadLayerDefinitions.map((definition) =>
+    new THREE.Color(darkPalette.thread).multiplyScalar(definition.brightness),
+  );
+  const threadNeutralColors = threadLayerDefinitions.map((definition) =>
+    new THREE.Color(TRANSITION_NEUTRALS.thread).multiplyScalar(
+      definition.brightness,
+    ),
+  );
+  const threadLightColors = threadLayerDefinitions.map((definition) =>
+    new THREE.Color(lightPalette.thread).multiplyScalar(definition.brightness),
+  );
+  const threadPaletteColors = threadLayerDefinitions.map(
+    (_, index) =>
+      [
+        threadDarkColors[index] as THREE.Color,
+        threadNeutralColors[index] as THREE.Color,
+        threadLightColors[index] as THREE.Color,
+      ] as const,
+  );
   const treeMaterials = threadLayerDefinitions.map((definition, layerIndex) => {
     const material = new LineMaterial({
-      color: 0xc4e8ff,
+      color:
+        initialTheme === "light"
+          ? lightPalette.thread
+          : darkPalette.thread,
       linewidth: definition.linewidth,
       transparent: true,
       opacity: definition.opacity,
@@ -756,8 +1065,12 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
       toneMapped: false,
     });
     material.fog = false;
-    material.color.multiplyScalar(definition.brightness);
-    configureThreadFade(material, threadPulse);
+    material.color.copy(
+      initialTheme === "light"
+        ? threadLightColors[layerIndex]
+        : threadDarkColors[layerIndex],
+    );
+    configureThreadFade(material, threadPulse, threadTheme);
     const layer = new LineSegments2(threadGeometry, material);
     layer.renderOrder = layerIndex + 1;
     world.add(layer);
@@ -774,8 +1087,13 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     starPositions[offset + 2] = -42 - random() * 68;
   }
   starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-  const starMaterial = createSoftPointMaterial(0x91c9ff, 2.1, 0.62);
-  scene.add(new THREE.Points(starGeometry, starMaterial));
+  const starMaterial = createSoftPointMaterial(
+    initialTheme === "light" ? lightPalette.star : darkPalette.star,
+    2.1,
+    initialTheme === "light" ? 0 : 0.62,
+  );
+  const stars = new THREE.Points(starGeometry, starMaterial);
+  scene.add(stars);
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
@@ -807,6 +1125,58 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
         ease: "none",
         repeat: -1,
       });
+  const paletteColors = {
+    background: [
+      new THREE.Color(darkPalette.background),
+      new THREE.Color(TRANSITION_NEUTRALS.background),
+      new THREE.Color(lightPalette.background),
+    ],
+    fog: [
+      new THREE.Color(darkPalette.fog),
+      new THREE.Color(TRANSITION_NEUTRALS.fog),
+      new THREE.Color(lightPalette.fog),
+    ],
+    hemisphereSky: [
+      new THREE.Color(darkPalette.hemisphereSky),
+      new THREE.Color(TRANSITION_NEUTRALS.hemisphereSky),
+      new THREE.Color(lightPalette.hemisphereSky),
+    ],
+    hemisphereGround: [
+      new THREE.Color(darkPalette.hemisphereGround),
+      new THREE.Color(TRANSITION_NEUTRALS.hemisphereGround),
+      new THREE.Color(lightPalette.hemisphereGround),
+    ],
+    keyLight: [
+      new THREE.Color(darkPalette.keyLight),
+      new THREE.Color(TRANSITION_NEUTRALS.keyLight),
+      new THREE.Color(lightPalette.keyLight),
+    ],
+    terrainEmissive: [
+      new THREE.Color(darkPalette.terrainEmissive),
+      new THREE.Color(TRANSITION_NEUTRALS.terrainEmissive),
+      new THREE.Color(lightPalette.terrainEmissive),
+    ],
+    core: [
+      new THREE.Color(darkPalette.core),
+      new THREE.Color(TRANSITION_NEUTRALS.core),
+      new THREE.Color(lightPalette.core),
+    ],
+    star: [
+      new THREE.Color(darkPalette.star),
+      new THREE.Color(TRANSITION_NEUTRALS.star),
+      new THREE.Color(lightPalette.star),
+    ],
+  } as const;
+  const lightAfterglowBackground = new THREE.Color(0x29251f);
+  const lightAfterglowFog = new THREE.Color(0x373129);
+  const duneDarkColors = darkPalette.duneFaces.map(
+    (color) => new THREE.Color(color),
+  );
+  const duneLightColors = lightPalette.duneFaces.map(
+    (color) => new THREE.Color(color),
+  );
+  let lastAppliedThemeMix = -1;
+  let lastAppliedLightDarkening = -1;
   let animationFrame = 0;
   let visible = !document.hidden;
   let disposed = false;
@@ -883,57 +1253,185 @@ function createScene(canvas: HTMLCanvasElement): SceneController {
     const lightPulse = lightPulseState.value * illumination;
     const afterglow = motionState.afterglow;
     const afterglowPulse = lightPulseState.value * afterglow;
+    const themeMix = motionState.themeMix;
+    const canopyLodProgress = smoothNoiseStep(
+      THREE.MathUtils.clamp((motionState.journey - 0.06) / 0.5, 0, 1),
+    );
+    const fallLodProgress = smoothNoiseStep(
+      THREE.MathUtils.clamp((motionState.journey - 0.52) / 0.34, 0, 1),
+    );
+    const nextVisibleThreadSegmentCount =
+      baseThreadSegmentCount +
+      Math.floor(detailCanopySegmentCount * canopyLodProgress) +
+      Math.floor(detailFallSegmentCount * fallLodProgress);
+    if (nextVisibleThreadSegmentCount !== visibleThreadSegmentCount) {
+      threadGeometry.instanceCount = nextVisibleThreadSegmentCount;
+      visibleThreadSegmentCount = nextVisibleThreadSegmentCount;
+    }
+    const lightDarkening = themeMix * afterglow;
+    if (
+      Math.abs(themeMix - lastAppliedThemeMix) > 0.0001 ||
+      Math.abs(lightDarkening - lastAppliedLightDarkening) > 0.0001
+    ) {
+      interpolateThemeColor(
+        sceneBackground,
+        paletteColors.background,
+        themeMix,
+      );
+      sceneBackground.lerp(
+        lightAfterglowBackground,
+        lightDarkening * 0.72,
+      );
+      interpolateThemeColor(
+        sceneFog.color,
+        paletteColors.fog,
+        themeMix,
+      );
+      sceneFog.color.lerp(lightAfterglowFog, lightDarkening * 0.58);
+      sceneFog.density = THREE.MathUtils.lerp(0.0215, 0.0115, themeMix);
+      interpolateThemeColor(
+        hemisphereLight.color,
+        paletteColors.hemisphereSky,
+        themeMix,
+      );
+      interpolateThemeColor(
+        hemisphereLight.groundColor,
+        paletteColors.hemisphereGround,
+        themeMix,
+      );
+      hemisphereLight.intensity = THREE.MathUtils.lerp(0.54, 0.48, themeMix);
+      interpolateThemeColor(
+        moonLight.color,
+        paletteColors.keyLight,
+        themeMix,
+      );
+      interpolateThemeColor(
+        terrainMaterial.emissive,
+        paletteColors.terrainEmissive,
+        themeMix,
+      );
+      terrainMotion.themeMix.value = themeMix;
+      interpolateThemeColor(
+        coreLight.color,
+        paletteColors.core,
+        themeMix,
+      );
+      interpolateThemeColor(
+        starMaterial.uniforms.pointColor.value,
+        paletteColors.star,
+        themeMix,
+      );
+      stars.visible = themeMix < 0.999;
+
+      for (let index = 0; index < duneMaterials.length; index += 1) {
+        duneMaterials[index].color.lerpColors(
+          duneDarkColors[index],
+          duneLightColors[index],
+          themeMix,
+        );
+        duneMaterials[index].opacity = THREE.MathUtils.lerp(
+          0.48,
+          0.72,
+          themeMix,
+        );
+      }
+
+      for (let index = 0; index < treeMaterials.length; index += 1) {
+        interpolateThemeColor(
+          treeMaterials[index].color,
+          threadPaletteColors[index],
+          themeMix,
+        );
+      }
+
+      threadTheme.value = themeMix;
+      lastAppliedThemeMix = themeMix;
+      lastAppliedLightDarkening = lightDarkening;
+    }
+
     terrainMotion.time.value = timeSeconds;
     terrainMotion.strength.value = tremorCurrent;
-    coreLight.intensity =
+    const darkCoreIntensity =
       9 +
       illumination * 18 +
       lightPulse * 9 +
       afterglow * 12 +
       afterglowPulse * 26 +
       tremorCurrent * (2 + Math.sin(timeSeconds * 15.5) * 1.2);
-    coreLight.distance = 30 + illumination * 32 + afterglow * 18;
+    const lightCoreIntensity = Math.max(
+      0.12,
+      1.1 -
+        illumination * 0.28 -
+        lightPulse * 0.08 -
+        afterglow * 0.5 -
+        afterglowPulse * 0.18 +
+        tremorCurrent * 0.08,
+    );
+    coreLight.intensity = THREE.MathUtils.lerp(
+      darkCoreIntensity,
+      lightCoreIntensity,
+      themeMix,
+    );
+    coreLight.distance = THREE.MathUtils.lerp(
+      30 + illumination * 32 + afterglow * 18,
+      16 + illumination * 4 + afterglow * 2,
+      themeMix,
+    );
     terrainMaterial.emissiveIntensity =
-      illumination * 0.2 +
-      lightPulse * 0.07 +
-      afterglow * 0.1 +
-      afterglowPulse * 0.14;
-    moonLight.intensity =
+      (illumination * 0.2 +
+        lightPulse * 0.07 +
+        afterglow * 0.1 +
+        afterglowPulse * 0.14) *
+      THREE.MathUtils.lerp(1, 0.08, themeMix);
+    const darkKeyLightIntensity =
       1.65 +
       illumination * 1.4 +
       lightPulse * 0.22 +
       afterglow * 0.8 +
       afterglowPulse * 0.65;
+    const lightKeyLightIntensity = Math.max(
+      0.72,
+      2.3 -
+        illumination * 0.52 -
+        lightPulse * 0.12 -
+        afterglow * 0.58 -
+        afterglowPulse * 0.22,
+    );
+    moonLight.intensity = THREE.MathUtils.lerp(
+      darkKeyLightIntensity,
+      lightKeyLightIntensity,
+      themeMix,
+    );
     renderer.toneMappingExposure =
-      1.04 +
-      illumination * 0.28 +
-      lightPulse * 0.07 +
-      afterglow * 0.18 +
-      afterglowPulse * 0.2;
+      THREE.MathUtils.lerp(1.04, 0.62, themeMix) +
+      illumination * THREE.MathUtils.lerp(0.28, -0.12, themeMix) +
+      lightPulse * THREE.MathUtils.lerp(0.07, -0.04, themeMix) +
+      afterglow * THREE.MathUtils.lerp(0.18, -0.14, themeMix) +
+      afterglowPulse * THREE.MathUtils.lerp(0.2, -0.08, themeMix);
     bloom.strength =
-      0.62 +
-      illumination * 0.44 +
-      lightPulse * 0.12 +
-      afterglow * 0.18 +
-      afterglowPulse * 0.3;
+      THREE.MathUtils.lerp(0.62, 0.04, themeMix) +
+      illumination * THREE.MathUtils.lerp(0.44, 0.02, themeMix) +
+      lightPulse * THREE.MathUtils.lerp(0.12, 0, themeMix) +
+      afterglow * THREE.MathUtils.lerp(0.18, 0.01, themeMix) +
+      afterglowPulse * THREE.MathUtils.lerp(0.3, 0, themeMix);
     threadPulse.value =
       illumination * 0.1 +
       lightPulse * 0.42 +
       afterglow * 0.12 +
       afterglowPulse * 0.35;
     starMaterial.uniforms.pointOpacity.value =
-      0.62 +
-      illumination * 0.12 +
-      lightPulse * 0.045 +
-      afterglow * 0.08 +
-      afterglowPulse * 0.035;
+      (0.62 +
+        illumination * 0.12 +
+        lightPulse * 0.045 +
+        afterglow * 0.08 +
+        afterglowPulse * 0.035) *
+      (1 - themeMix);
     starMaterial.uniforms.pointSize.value =
       2.1 +
       illumination * 0.65 +
       lightPulse * 0.24 +
       afterglow * 0.18 +
       afterglowPulse * 0.12;
-
     composer.render();
   };
 
@@ -1015,9 +1513,16 @@ function createTerrainLayer(
   const geometry = new THREE.PlaneGeometry(130, definition.depth, 164, definition.depthSegments);
   const positions = geometry.attributes.position;
   const colors = new THREE.BufferAttribute(new Float32Array(positions.count * 3), 3);
+  const lightColors = new THREE.BufferAttribute(
+    new Float32Array(positions.count * 3),
+    3,
+  );
   const shadow = new THREE.Color(definition.shadow);
   const highlight = new THREE.Color(definition.highlight);
+  const lightShadow = new THREE.Color(definition.lightShadow);
+  const lightHighlight = new THREE.Color(definition.lightHighlight);
   const color = new THREE.Color();
+  const lightColor = new THREE.Color();
 
   for (let index = 0; index < positions.count; index += 1) {
     const x = positions.getX(index);
@@ -1066,10 +1571,13 @@ function createTerrainLayer(
       1,
     );
     color.copy(shadow).lerp(highlight, colorMix);
+    lightColor.copy(lightShadow).lerp(lightHighlight, colorMix);
     colors.setXYZ(index, color.r, color.g, color.b);
+    lightColors.setXYZ(index, lightColor.r, lightColor.g, lightColor.b);
   }
 
   geometry.setAttribute("color", colors);
+  geometry.setAttribute("coordinateLightColor", lightColors);
   geometry.rotateX(-Math.PI / 2);
   geometry.translate(0, -1.2, definition.centerZ);
 
@@ -1404,9 +1912,11 @@ function createSoftPointMaterial(
 function configureThreadFade(
   material: LineMaterial,
   pulse: { value: number },
+  theme: { value: number },
 ) {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.threadPulse = pulse;
+    shader.uniforms.threadThemeMix = theme;
     shader.vertexShader = `
       varying float vThreadDistance;
       ${shader.vertexShader}
@@ -1426,13 +1936,20 @@ function configureThreadFade(
     shader.fragmentShader = `
       varying float vThreadDistance;
       uniform float threadPulse;
+      uniform float threadThemeMix;
       ${shader.fragmentShader}
     `
       .replace(
         "float alpha = opacity;",
         `
           float terminalFade = 1.0 - smoothstep(105.0, 280.0, vThreadDistance);
-          float alpha = opacity * terminalFade * (1.0 + threadPulse);
+          float darkThreadContrast = mix(1.0, 3.4, threadThemeMix);
+          float alpha = (
+            opacity *
+            terminalFade *
+            (1.0 + threadPulse) *
+            darkThreadContrast
+          );
         `,
       )
       .replace(
@@ -1446,7 +1963,7 @@ function configureThreadFade(
         `,
       );
   };
-  material.customProgramCacheKey = () => "coordinate-thread-distance-fade-v3";
+  material.customProgramCacheKey = () => "coordinate-thread-theme-fade-v4";
 }
 
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {
@@ -1466,6 +1983,42 @@ function mulberry32(seed: number) {
   };
 }
 
+function shuffleInPlace<T>(values: T[], random: () => number) {
+  for (let index = values.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    const currentValue = values[index] as T;
+    values[index] = values[swapIndex] as T;
+    values[swapIndex] = currentValue;
+  }
+}
+
+function interpolateThemeColor(
+  target: THREE.Color,
+  colors: readonly [THREE.Color, THREE.Color, THREE.Color],
+  mix: number,
+) {
+  if (mix <= 0.5) {
+    target.lerpColors(colors[0], colors[1], mix * 2);
+    return;
+  }
+
+  target.lerpColors(colors[1], colors[2], (mix - 0.5) * 2);
+}
+
+function createThemeColorInterpolator(
+  dark: string,
+  neutral: string,
+  light: string,
+) {
+  const darkToNeutral = gsap.utils.interpolate(dark, neutral);
+  const neutralToLight = gsap.utils.interpolate(neutral, light);
+
+  return (mix: number) =>
+    mix <= 0.5
+      ? darkToNeutral(mix * 2)
+      : neutralToLight((mix - 0.5) * 2);
+}
+
 function setupTimeRewind({
   experience,
   button,
@@ -1476,6 +2029,8 @@ function setupTimeRewind({
   rule,
   timeWarp,
   scrollTimeline,
+  onRewindStart,
+  onRewindComplete,
 }: TimeRewindOptions) {
   const rings = Array.from(
     experience.querySelectorAll<HTMLElement>("[data-time-warp-ring]"),
@@ -1511,7 +2066,10 @@ function setupTimeRewind({
       {
         y: -7,
         scale: 1.07,
-        color: "#06366e",
+        color: () =>
+          getComputedStyle(experience)
+            .getPropertyValue("--rewind-hover")
+            .trim(),
         duration: 0.28,
         ease: "power4.out",
       },
@@ -1522,7 +2080,10 @@ function setupTimeRewind({
       {
         autoAlpha: 1,
         x: 5,
-        color: "#06366e",
+        color: () =>
+          getComputedStyle(experience)
+            .getPropertyValue("--rewind-hover")
+            .trim(),
         letterSpacing: "0.34em",
         duration: 0.22,
         ease: "power3.out",
@@ -1562,7 +2123,7 @@ function setupTimeRewind({
 
   const playHover = () => {
     if (!isRewinding) {
-      hoverTimeline.play();
+      hoverTimeline.invalidate().play();
     }
   };
 
@@ -1575,6 +2136,7 @@ function setupTimeRewind({
   const finishRewind = () => {
     window.scrollTo(0, 0);
     scrollTimeline.progress(0).pause();
+    onRewindComplete();
     trigger?.enable();
     ScrollTrigger.update();
     button.disabled = false;
@@ -1604,6 +2166,7 @@ function setupTimeRewind({
     rewindTimeline?.kill();
     trigger?.disable(false, true);
     scrollTimeline.pause();
+    onRewindStart();
 
     const scrollableDistance = Math.max(
       1,

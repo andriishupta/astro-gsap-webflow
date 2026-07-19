@@ -1,10 +1,80 @@
 .coordinate-experience {
+  --experience-background: #020816;
+  --stage-background: #051a40;
   --stage-ink: #f7fbff;
   --stage-muted: rgba(223, 237, 255, 0.66);
   --stage-faint: rgba(197, 222, 255, 0.32);
+  --canvas-filter: blur(0.75px) saturate(0.88);
+  --atmosphere-background:
+    radial-gradient(circle at 54% 65%, transparent 0 12%, rgba(1, 7, 20, 0.08) 38%, rgba(1, 6, 18, 0.44) 100%),
+    linear-gradient(90deg, rgba(1, 7, 22, 0.44), transparent 35% 72%, rgba(1, 7, 22, 0.2));
+  --warp-core: rgba(226, 247, 255, 0.24);
+  --warp-mid: rgba(142, 211, 255, 0.1);
+  --warp-ring: rgba(218, 244, 255, 0.46);
+  --loader-background: #020a1e;
+  --loader-track: rgba(189, 220, 255, 0.14);
+  --loader-fill: #d9ecff;
+  --chapter-ink: rgba(245, 250, 255, 0.86);
+  --whisper-ink: rgba(226, 241, 255, 0.7);
+  --cue-ink: rgba(226, 240, 255, 0.72);
+  --cue-strong: #eef8ff;
+  --progress-track: rgba(204, 228, 255, 0.18);
+  --progress-fill: rgba(229, 244, 255, 0.88);
+  --control-ink: rgba(226, 240, 255, 0.62);
+  --control-strong: #fff;
+  --rewind-hover: #06366e;
+  --final-shadow: 0 1px 18px rgba(255, 255, 255, 0.36);
+  --dialog-panel: rgba(3, 11, 31, 0.025);
+  --dialog-shadow: inset 0 0 8rem rgba(0, 2, 12, 0.055);
+  --dialog-content-shadow: 0 2px 18px rgba(0, 3, 16, 0.82);
+  --dialog-copy: rgba(232, 242, 255, 0.78);
+  --dialog-copy-shadow: 0 1px 8px rgba(0, 4, 18, 0.54);
+  --dialog-meta: rgba(199, 222, 250, 0.54);
+  --dialog-close-background: rgba(230, 243, 255, 0.08);
+  --dialog-close-hover: rgba(230, 243, 255, 0.14);
+  --dialog-close-ink: rgba(241, 248, 255, 0.84);
+  color-scheme: dark;
   position: relative;
-  height: 500svh;
-  background: #020816;
+  height: 1400svh;
+  background: var(--experience-background);
+}
+
+.coordinate-experience[data-coordinate-theme="light"] {
+  --experience-background: #4a391f;
+  --stage-background: #81765d;
+  --stage-ink: #2a1905;
+  --stage-muted: rgba(47, 30, 8, 0.68);
+  --stage-faint: rgba(62, 40, 11, 0.34);
+  --canvas-filter: blur(0.65px) saturate(0.82) contrast(1.15);
+  --atmosphere-background:
+    radial-gradient(circle at 54% 65%, transparent 0 17%, rgba(90, 57, 13, 0.035) 45%, rgba(59, 37, 9, 0.18) 100%),
+    linear-gradient(90deg, rgba(73, 45, 10, 0.14), transparent 36% 72%, rgba(73, 45, 10, 0.08));
+  --warp-core: rgba(255, 248, 216, 0.24);
+  --warp-mid: rgba(183, 131, 43, 0.1);
+  --warp-ring: rgba(84, 54, 13, 0.38);
+  --loader-background: #99865f;
+  --loader-track: rgba(71, 45, 10, 0.16);
+  --loader-fill: #3a2408;
+  --chapter-ink: rgba(42, 26, 7, 0.88);
+  --whisper-ink: rgba(49, 32, 10, 0.72);
+  --cue-ink: rgba(48, 30, 8, 0.72);
+  --cue-strong: #2b1a05;
+  --progress-track: rgba(60, 38, 10, 0.2);
+  --progress-fill: rgba(48, 30, 8, 0.86);
+  --control-ink: rgba(48, 30, 8, 0.66);
+  --control-strong: #211304;
+  --rewind-hover: #855816;
+  --final-shadow: 0 1px 18px rgba(255, 248, 217, 0.5);
+  --dialog-panel: rgba(255, 249, 225, 0.035);
+  --dialog-shadow: inset 0 0 8rem rgba(79, 48, 8, 0.06);
+  --dialog-content-shadow: 0 2px 18px rgba(255, 249, 225, 0.76);
+  --dialog-copy: rgba(48, 30, 8, 0.8);
+  --dialog-copy-shadow: 0 1px 8px rgba(255, 249, 225, 0.62);
+  --dialog-meta: rgba(59, 38, 11, 0.58);
+  --dialog-close-background: rgba(56, 35, 8, 0.09);
+  --dialog-close-hover: rgba(56, 35, 8, 0.15);
+  --dialog-close-ink: rgba(43, 26, 6, 0.86);
+  color-scheme: light;
 }
 
 .coordinate-stage {
@@ -14,7 +84,7 @@
   min-height: 620px;
   overflow: hidden;
   isolation: isolate;
-  background: #051a40;
+  background: var(--stage-background);
 }
 
 .coordinate-canvas {
@@ -24,7 +94,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  filter: blur(0.75px) saturate(0.88);
+  filter: var(--canvas-filter);
   opacity: 0;
   transform: scale(1.002);
 }
@@ -34,9 +104,7 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 54% 65%, transparent 0 12%, rgba(1, 7, 20, 0.08) 38%, rgba(1, 6, 18, 0.44) 100%),
-    linear-gradient(90deg, rgba(1, 7, 22, 0.44), transparent 35% 72%, rgba(1, 7, 22, 0.2));
+  background: var(--atmosphere-background);
 }
 
 .coordinate-time-warp {
@@ -48,8 +116,8 @@
   place-items: center;
   background: radial-gradient(
     circle at center,
-    rgba(226, 247, 255, 0.24) 0,
-    rgba(142, 211, 255, 0.1) 18%,
+    var(--warp-core) 0,
+    var(--warp-mid) 18%,
     transparent 53%
   );
   mix-blend-mode: screen;
@@ -62,7 +130,7 @@
   position: absolute;
   display: block;
   aspect-ratio: 1;
-  border: 1px solid rgba(218, 244, 255, 0.46);
+  border: 1px solid var(--warp-ring);
   border-radius: 50%;
   filter: blur(1px);
   opacity: 0;
@@ -87,7 +155,7 @@
   z-index: 20;
   display: grid;
   place-items: center;
-  background: #020a1e;
+  background: var(--loader-background);
   color: var(--stage-muted);
 }
 
@@ -108,14 +176,14 @@
 .coordinate-loader__line {
   height: 1px;
   overflow: hidden;
-  background: rgba(189, 220, 255, 0.14);
+  background: var(--loader-track);
 }
 
 .coordinate-loader__line > span {
   display: block;
   width: 100%;
   height: 100%;
-  background: #d9ecff;
+  background: var(--loader-fill);
   transform: scaleX(0);
   transform-origin: left center;
 }
@@ -177,7 +245,7 @@
   left: clamp(3rem, 12vw, 11rem);
   max-width: 36rem;
   margin: 0;
-  color: rgba(245, 250, 255, 0.86);
+  color: var(--chapter-ink);
   font-family: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
   font-size: clamp(2.2rem, 4vw, 4.4rem);
   font-weight: 400;
@@ -192,7 +260,7 @@
   position: absolute;
   max-width: 28rem;
   margin: 0;
-  color: rgba(226, 241, 255, 0.7);
+  color: var(--whisper-ink);
   font-family: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
   font-size: clamp(1.05rem, 1.55vw, 1.6rem);
   font-weight: 400;
@@ -239,7 +307,7 @@
   place-items: center;
   border: 0;
   background: transparent;
-  color: rgba(245, 250, 255, 0.9);
+  color: var(--chapter-ink);
   font: inherit;
   font-family: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
   font-size: clamp(2.7rem, 4.8vw, 5.4rem);
@@ -250,6 +318,11 @@
   pointer-events: none;
   cursor: pointer;
   transform-origin: center;
+}
+
+.coordinate-experience[data-coordinate-theme="light"] .coordinate-chapter--final {
+  color: var(--chapter-ink) !important;
+  text-shadow: var(--final-shadow) !important;
 }
 
 .coordinate-chapter--final:focus-visible {
@@ -315,7 +388,7 @@
   display: grid;
   justify-items: center;
   gap: 0.68rem;
-  color: rgba(226, 240, 255, 0.72);
+  color: var(--cue-ink);
   font-size: 0.58rem;
   font-weight: 500;
   letter-spacing: 0.34em;
@@ -326,7 +399,7 @@
   position: relative;
   width: 1.55rem;
   height: 2.35rem;
-  border: 1px solid rgba(231, 244, 255, 0.72);
+  border: 1px solid currentColor;
   border-radius: 999px;
 }
 
@@ -337,7 +410,7 @@
   width: 2px;
   height: 0.34rem;
   border-radius: 1px;
-  background: #eef8ff;
+  background: var(--cue-strong);
   transform: translateX(-50%);
   opacity: 0;
 }
@@ -345,7 +418,7 @@
 .coordinate-scroll-cue__rule {
   width: 1px;
   height: 3.2rem;
-  background: rgba(226, 241, 255, 0.55);
+  background: currentColor;
 }
 
 .coordinate-progress {
@@ -365,14 +438,14 @@
   width: 1px;
   height: clamp(8rem, 22vh, 13rem);
   overflow: hidden;
-  background: rgba(204, 228, 255, 0.18);
+  background: var(--progress-track);
 }
 
 .coordinate-progress__fill {
   position: absolute;
   inset: 0;
   display: block;
-  background: rgba(229, 244, 255, 0.88);
+  background: var(--progress-fill);
   transform: scaleY(0);
   transform-origin: top center;
 }
@@ -399,7 +472,7 @@
   border: 0;
   border-bottom: 1px solid transparent;
   background: transparent;
-  color: rgba(226, 240, 255, 0.62);
+  color: var(--control-ink);
   font-size: 0.59rem;
   font-weight: 500;
   letter-spacing: 0.24em;
@@ -410,7 +483,7 @@
 .coordinate-utility button:hover,
 .coordinate-utility button:focus-visible {
   border-color: currentColor;
-  color: #fff;
+  color: var(--control-strong);
   outline: none;
 }
 
@@ -452,8 +525,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: rgba(3, 11, 31, 0.025);
-  box-shadow: inset 0 0 8rem rgba(0, 2, 12, 0.055);
+  background: var(--dialog-panel);
+  box-shadow: var(--dialog-shadow);
   scrollbar-color: rgba(198, 224, 255, 0.3) transparent;
   scrollbar-width: thin;
 }
@@ -479,7 +552,7 @@
   padding: clamp(5rem, 8vw, 9rem) clamp(3rem, 9vw, 10rem);
   column-gap: clamp(4rem, 9vw, 12rem);
   row-gap: 2.5rem;
-  text-shadow: 0 2px 18px rgba(0, 3, 16, 0.82);
+  text-shadow: var(--dialog-content-shadow);
 }
 
 .coordinate-dialog__close {
@@ -494,8 +567,8 @@
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: rgba(230, 243, 255, 0.08);
-  color: rgba(241, 248, 255, 0.84);
+  background: var(--dialog-close-background);
+  color: var(--dialog-close-ink);
   cursor: pointer;
 }
 
@@ -508,12 +581,12 @@
 }
 
 .coordinate-dialog__close:hover {
-  background: rgba(230, 243, 255, 0.14);
-  color: #fff;
+  background: var(--dialog-close-hover);
+  color: var(--control-strong);
 }
 
 .coordinate-dialog__close:focus-visible {
-  outline: 1px solid rgba(231, 244, 255, 0.9);
+  outline: 1px solid currentColor;
   outline-offset: 4px;
 }
 
@@ -546,11 +619,11 @@
 
 .coordinate-dialog__copy p {
   margin: 0;
-  color: rgba(232, 242, 255, 0.78);
+  color: var(--dialog-copy);
   font-size: clamp(0.94rem, 1.05vw, 1.12rem);
   letter-spacing: 0.015em;
   line-height: 1.75;
-  text-shadow: 0 1px 8px rgba(0, 4, 18, 0.54);
+  text-shadow: var(--dialog-copy-shadow);
   text-wrap: pretty;
 }
 
@@ -559,13 +632,13 @@
 }
 
 .coordinate-dialog cite {
-  color: rgba(248, 251, 255, 0.96);
+  color: var(--stage-ink);
 }
 
 .coordinate-dialog__meta {
   grid-column: 2;
   margin: 0;
-  color: rgba(199, 222, 250, 0.54);
+  color: var(--dialog-meta);
   font-size: 0.68rem;
   letter-spacing: 0.14em;
   line-height: 1.65;
@@ -592,7 +665,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #071735;
+  background: var(--stage-background);
 }
 
 .webgl-failed .coordinate-copy {
