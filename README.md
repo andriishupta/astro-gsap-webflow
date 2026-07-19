@@ -9,8 +9,8 @@
 Cathedral of Threads is an original, one-page interactive journey into a
 metaphysical coordinate where human memories appear as luminous paths. Desktop
 visitors move through a procedural Three.js world with a single GSAP-controlled
-scroll timeline. Phones receive a separate, lightweight version made from
-pre-rendered WebP scene stills and semantic HTML.
+scroll timeline. Phones receive a separate, lightweight version with one fixed
+WebP backdrop selected from dark or light artwork by the device theme.
 
 The visual language is inspired by mythic shared-memory spaces, but the project
 does not reproduce anime characters, names, symbols, costumes, dialogue, music,
@@ -20,8 +20,8 @@ or production artwork.
 
 - Desktop: real-time WebGL terrain, filaments, particles, lighting, bloom, and a
   reversible scroll journey.
-- Mobile: normal document scrolling, lightweight scene stills, real HTML copy,
-  and no Three.js download or sensor permission.
+- Mobile: normal document scrolling over one fixed, theme-selected scene
+  backdrop, real HTML copy, and no Three.js download or sensor permission.
 - Accessibility: decorative canvas, semantic story content, keyboard-accessible
   About UI, and reduced-motion behavior.
 - Themes: the desktop passage moves between a midnight-blue world and a

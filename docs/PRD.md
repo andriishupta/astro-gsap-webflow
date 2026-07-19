@@ -34,8 +34,8 @@ Desired outcome:
 
 The experience contains one route. Desktop uses one continuous scroll timeline:
 a sticky full-viewport stage remains in place while a long scroll track advances
-the scene. Phones use a separate normal-flow story made from pre-rendered scene
-stills and semantic HTML.
+the scene. Phones use a separate normal-flow story over one fixed,
+theme-selected scene still with semantic HTML.
 
 Included:
 
@@ -49,9 +49,9 @@ Included:
 - Intro title, scroll prompt, chapter progress, and About.
 - Functional full-screen About overlay.
 - Reduced-motion behavior and WebGL failure fallback.
-- A mobile 2D passage with portrait WebP scene stills, normal document scrolling,
-  "Swipe" and "Tap" interaction language, and a recommendation to visit on
-  desktop for the full real-time experience.
+- A mobile 2D passage with one fixed portrait WebP backdrop selected by device
+  theme, normal document scrolling, "Swipe" and "Tap" interaction language, and
+  a recommendation to visit on desktop for the full real-time experience.
 
 Not included:
 
@@ -107,9 +107,10 @@ Persistent or contextual UI:
 
 All UI text is HTML. The canvas is visual and marked as decorative.
 
-On phones, three natural-scroll panels carry the same narrative beats over
-pre-rendered dark and light scene stills. About remains a native dialog and the
-credits remain real links.
+On phones, three natural-scroll content panels carry the same narrative beats
+over one fixed scene still. The browser selects the dark or light WebP only from
+the device color scheme. About remains a native dialog and the credits remain
+real links.
 
 ## 6. Visual direction
 
@@ -180,8 +181,9 @@ shipping to WebGL. It is not the critical path for this hackathon build.
 ### Mobile
 
 - The desktop Three.js bundle is loaded only above the phone breakpoint.
-- Mobile uses two compressed portrait WebP stills and real HTML content.
-- Lightweight scroll parallax may move the stills, but no motion-sensor
+- Mobile displays one compressed portrait WebP backdrop at a time and keeps all
+  story content in real HTML.
+- The background remains fixed while the content scrolls. No motion-sensor
   permission is requested.
 - `touch-action: pan-y`, document visibility handling, and reduced-motion styles
   keep the passage predictable and inexpensive.

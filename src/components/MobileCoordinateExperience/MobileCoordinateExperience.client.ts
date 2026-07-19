@@ -13,20 +13,31 @@ function setupMobileExperience(scope: HTMLElement) {
   const closeButton = scope.querySelector<HTMLButtonElement>(
     "[data-mobile-dialog-close]",
   );
+  const dialogScroll = scope.querySelector<HTMLElement>(
+    "[data-mobile-dialog-scroll]",
+  );
   const rewindButton = scope.querySelector<HTMLButtonElement>(
     "[data-mobile-rewind]",
-  );
-  const scenes = Array.from(
-    scope.querySelectorAll<HTMLElement>("[data-mobile-scene]"),
   );
   const reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
-  let animationFrame = 0;
+  let lockedPageScroll = 0;
+
+  const lockPage = () => {
+    lockedPageScroll = window.scrollY;
+    document.documentElement.style.setProperty(
+      "--mobile-dialog-page-offset",
+      `${-lockedPageScroll}px`,
+    );
+    document.documentElement.classList.add("mobile-dialog-open");
+  };
 
   const openDialog = () => {
     if (dialog && !dialog.open) {
+      lockPage();
       dialog.showModal();
+      dialogScroll?.scrollTo({ top: 0 });
     }
   };
 
@@ -36,6 +47,18 @@ function setupMobileExperience(scope: HTMLElement) {
     }
   };
 
+  const unlockPage = () => {
+    if (!document.documentElement.classList.contains("mobile-dialog-open")) {
+      return;
+    }
+
+    document.documentElement.classList.remove("mobile-dialog-open");
+    document.documentElement.style.removeProperty(
+      "--mobile-dialog-page-offset",
+    );
+    window.scrollTo({ top: lockedPageScroll, behavior: "auto" });
+  };
+
   const rewind = () => {
     scope.scrollIntoView({
       behavior: reducedMotion ? "auto" : "smooth",
@@ -43,52 +66,17 @@ function setupMobileExperience(scope: HTMLElement) {
     });
   };
 
-  const updateScenes = () => {
-    animationFrame = 0;
-    const viewportHeight = Math.max(1, window.innerHeight);
-
-    scenes.forEach((scene) => {
-      const rect = scene.parentElement?.getBoundingClientRect();
-      if (!rect) {
-        return;
-      }
-
-      const progress = Math.min(
-        1,
-        Math.max(0, (viewportHeight - rect.top) / (viewportHeight + rect.height)),
-      );
-      const shift = (progress - 0.5) * 28;
-      scene.style.setProperty("--mobile-parallax", `${shift.toFixed(2)}px`);
-    });
-  };
-
-  const requestSceneUpdate = () => {
-    if (!animationFrame && !document.hidden) {
-      animationFrame = window.requestAnimationFrame(updateScenes);
-    }
-  };
-
   openButton?.addEventListener("click", openDialog);
   closeButton?.addEventListener("click", closeDialog);
+  dialog?.addEventListener("close", unlockPage);
   rewindButton?.addEventListener("click", rewind);
 
-  if (!reducedMotion) {
-    window.addEventListener("scroll", requestSceneUpdate, { passive: true });
-    window.addEventListener("resize", requestSceneUpdate, { passive: true });
-    document.addEventListener("visibilitychange", requestSceneUpdate);
-    requestSceneUpdate();
-  }
-
   const teardown = () => {
-    if (animationFrame) {
-      window.cancelAnimationFrame(animationFrame);
-    }
     openButton?.removeEventListener("click", openDialog);
     closeButton?.removeEventListener("click", closeDialog);
+    dialog?.removeEventListener("close", unlockPage);
     rewindButton?.removeEventListener("click", rewind);
-    window.removeEventListener("scroll", requestSceneUpdate);
-    window.removeEventListener("resize", requestSceneUpdate);
-    document.removeEventListener("visibilitychange", requestSceneUpdate);
+    unlockPage();
   };
 
   document.addEventListener("astro:before-swap", teardown, { once: true });

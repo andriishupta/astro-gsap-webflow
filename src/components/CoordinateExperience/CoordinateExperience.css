@@ -24,8 +24,10 @@
   --control-strong: #fff;
   --rewind-hover: #06366e;
   --final-shadow: 0 1px 18px rgba(255, 255, 255, 0.36);
-  --dialog-panel: rgba(3, 11, 31, 0.025);
-  --dialog-shadow: inset 0 0 8rem rgba(0, 2, 12, 0.055);
+  --dialog-panel: rgba(3, 11, 31, 0.58);
+  --dialog-shadow:
+    inset 0 0 12rem rgba(0, 2, 12, 0.48),
+    inset 0 0 0 1px rgba(218, 238, 255, 0.035);
   --dialog-content-shadow: 0 2px 18px rgba(0, 3, 16, 0.82);
   --dialog-copy: rgba(232, 242, 255, 0.78);
   --dialog-copy-shadow: 0 1px 8px rgba(0, 4, 18, 0.54);
@@ -65,8 +67,10 @@
   --control-strong: #090806;
   --rewind-hover: #855816;
   --final-shadow: 0 1px 18px rgba(255, 250, 225, 0.38);
-  --dialog-panel: rgba(255, 249, 225, 0.035);
-  --dialog-shadow: inset 0 0 8rem rgba(49, 40, 18, 0.05);
+  --dialog-panel: rgba(248, 239, 204, 0.62);
+  --dialog-shadow:
+    inset 0 0 12rem rgba(87, 64, 23, 0.24),
+    inset 0 0 0 1px rgba(64, 45, 12, 0.035);
   --dialog-content-shadow: 0 2px 18px rgba(255, 249, 225, 0.76);
   --dialog-copy: rgba(14, 13, 9, 0.82);
   --dialog-copy-shadow: 0 1px 8px rgba(255, 249, 225, 0.62);
@@ -555,6 +559,8 @@
   overscroll-behavior: contain;
   background: var(--dialog-panel);
   box-shadow: var(--dialog-shadow);
+  -webkit-backdrop-filter: blur(2px) saturate(0.92);
+  backdrop-filter: blur(2px) saturate(0.92);
   scrollbar-color: rgba(198, 224, 255, 0.3) transparent;
   scrollbar-width: thin;
 }

@@ -15,21 +15,27 @@ import "./MobileCoordinateExperience.css";
     About
   </button>
 
-  <section
-    class="mobile-coordinate__panel mobile-coordinate__panel--opening"
-    id="mobile-start"
-  >
+  <picture class="mobile-coordinate__backdrop" aria-hidden="true">
+    <source
+      srcset="/images/coordinate/mobile-light.webp"
+      media="(prefers-color-scheme: light)"
+      type="image/webp"
+    />
     <img
-      class="mobile-coordinate__scene"
-      data-mobile-scene
       src="/images/coordinate/mobile-dark.webp"
-      width="656"
-      height="1440"
+      width="1200"
+      height="2160"
       alt=""
       fetchpriority="high"
       decoding="async"
     />
-    <div class="mobile-coordinate__shade" aria-hidden="true"></div>
+  </picture>
+  <div class="mobile-coordinate__backdrop-shade" aria-hidden="true"></div>
+
+  <section
+    class="mobile-coordinate__panel mobile-coordinate__panel--opening"
+    id="mobile-start"
+  >
     <p class="mobile-coordinate__index" aria-hidden="true">01 / 03</p>
     <div class="mobile-coordinate__copy mobile-coordinate__copy--opening">
       <p class="mobile-coordinate__eyebrow">A mobile passage</p>
@@ -39,6 +45,9 @@ import "./MobileCoordinateExperience.css";
       </h1>
       <p class="mobile-coordinate__premise">
         The coordinate where every memory converges.
+      </p>
+      <p class="mobile-coordinate__desktop-hint">
+        Use desktop for the full experience.
       </p>
     </div>
     <a class="mobile-coordinate__cue" href="#mobile-approach">
@@ -51,25 +60,11 @@ import "./MobileCoordinateExperience.css";
     class="mobile-coordinate__panel mobile-coordinate__panel--approach"
     id="mobile-approach"
   >
-    <img
-      class="mobile-coordinate__scene mobile-coordinate__scene--approach"
-      data-mobile-scene
-      src="/images/coordinate/mobile-dark.webp"
-      width="656"
-      height="1440"
-      alt=""
-      loading="lazy"
-      decoding="async"
-    />
-    <div class="mobile-coordinate__shade" aria-hidden="true"></div>
     <p class="mobile-coordinate__index" aria-hidden="true">02 / 03</p>
     <div class="mobile-coordinate__copy">
       <p class="mobile-coordinate__eyebrow">Convergence</p>
       <h2>Every path remembers.</h2>
       <p>A thousand lives. One shared echo.</p>
-      <aside class="mobile-coordinate__desktop-note">
-        For the complete real-time 3D journey, visit on a desktop or laptop.
-      </aside>
     </div>
   </section>
 
@@ -77,17 +72,6 @@ import "./MobileCoordinateExperience.css";
     class="mobile-coordinate__panel mobile-coordinate__panel--afterglow"
     id="mobile-afterglow"
   >
-    <img
-      class="mobile-coordinate__scene mobile-coordinate__scene--afterglow"
-      data-mobile-scene
-      src="/images/coordinate/mobile-light.webp"
-      width="656"
-      height="1440"
-      alt=""
-      loading="lazy"
-      decoding="async"
-    />
-    <div class="mobile-coordinate__shade" aria-hidden="true"></div>
     <p class="mobile-coordinate__index" aria-hidden="true">03 / 03</p>
     <div class="mobile-coordinate__copy mobile-coordinate__copy--afterglow">
       <p class="mobile-coordinate__eyebrow">Afterglow</p>
@@ -123,35 +107,39 @@ import "./MobileCoordinateExperience.css";
     >
       <span aria-hidden="true">×</span>
     </button>
-    <p class="mobile-coordinate__eyebrow">About the experiment</p>
-    <h2 id="mobile-about-title">A place outside time.</h2>
-    <div id="mobile-about-description">
-      <p>
-        Cathedral of Threads is a hackathon-built experiment about collective
-        memory. The desktop version renders its dunes and luminous paths in real
-        time; this mobile passage uses lightweight scene stills.
-      </p>
-      <p>
-        The initial spark came from the idea of the Coordinate in
-        <cite>Attack on Titan</cite>. This independent interpretation reproduces
-        no characters, production artwork, dialogue, music, or story material.
-      </p>
-      <p>
-        The project is not affiliated with, endorsed by, or connected to the
-        anime, manga, studios, publishers, or rights holders.
+    <div class="mobile-coordinate__dialog-scroll" data-mobile-dialog-scroll>
+      <p class="mobile-coordinate__eyebrow">About the experiment</p>
+      <h2 id="mobile-about-title">A place outside time.</h2>
+      <div id="mobile-about-description">
+        <p>
+          Cathedral of Threads is a hackathon-built experiment about collective
+          memory. The desktop version renders its dunes and luminous paths in
+          real time; this mobile passage uses one lightweight scene still
+          selected for your device theme.
+        </p>
+        <p>
+          The initial spark came from the idea of the Coordinate in
+          <cite>Attack on Titan</cite>. This independent interpretation
+          reproduces no characters, production artwork, dialogue, music, or
+          story material.
+        </p>
+        <p>
+          The project is not affiliated with, endorsed by, or connected to the
+          anime, manga, studios, publishers, or rights holders.
+        </p>
+      </div>
+      <p class="mobile-coordinate__dialog-meta">
+        Made by
+        <a href="https://andriishupta.dev" target="_blank" rel="noreferrer"
+          >Andrii Shupta</a
+        >. Built with Astro, Three.js, and GSAP.
+        <a
+          href="https://github.com/andriishupta/astro-gsap-webflow"
+          target="_blank"
+          rel="noreferrer">Source on GitHub</a
+        >.
       </p>
     </div>
-    <p class="mobile-coordinate__dialog-meta">
-      Made by
-      <a href="https://andriishupta.dev" target="_blank" rel="noreferrer"
-        >Andrii Shupta</a
-      >. Built with Astro, Three.js, and GSAP.
-      <a
-        href="https://github.com/andriishupta/astro-gsap-webflow"
-        target="_blank"
-        rel="noreferrer">Source on GitHub</a
-      >.
-    </p>
   </dialog>
 </main>
 
