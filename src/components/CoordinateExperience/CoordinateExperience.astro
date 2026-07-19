@@ -3,27 +3,35 @@ import "./CoordinateExperience.css";
 ---
 
 <main class="coordinate-experience" data-coordinate-experience>
-  <section class="coordinate-stage" aria-label="Cathedral of Threads interactive scene">
-    <canvas class="coordinate-canvas" data-coordinate-canvas aria-hidden="true"></canvas>
+  <section
+    class="coordinate-stage"
+    aria-label="Cathedral of Threads interactive scene"
+  >
+    <canvas class="coordinate-canvas" data-coordinate-canvas aria-hidden="true"
+    ></canvas>
     <div class="coordinate-atmosphere" aria-hidden="true"></div>
     <div class="coordinate-time-warp" data-time-warp aria-hidden="true">
       <span
         class="coordinate-time-warp__ring coordinate-time-warp__ring--outer"
-        data-time-warp-ring
-      ></span>
+        data-time-warp-ring></span>
       <span
         class="coordinate-time-warp__ring coordinate-time-warp__ring--middle"
-        data-time-warp-ring
-      ></span>
+        data-time-warp-ring></span>
       <span
         class="coordinate-time-warp__ring coordinate-time-warp__ring--inner"
-        data-time-warp-ring
-      ></span>
+        data-time-warp-ring></span>
     </div>
 
-    <div class="coordinate-loader" data-coordinate-loader role="status" aria-live="polite">
+    <div
+      class="coordinate-loader"
+      data-coordinate-loader
+      role="status"
+      aria-live="polite"
+    >
       <div class="coordinate-loader__content">
-        <span class="coordinate-loader__label" data-loader-label>Connecting</span>
+        <span class="coordinate-loader__label" data-loader-label
+          >Connecting</span
+        >
         <span class="coordinate-loader__line" aria-hidden="true">
           <span data-loader-line></span>
         </span>
@@ -75,13 +83,19 @@ import "./CoordinateExperience.css";
             <span class="coordinate-rewind__label" data-time-rewind-label>
               Nothing is ever truly lost.
             </span>
-            <span class="coordinate-rewind__hint" data-time-rewind-hint aria-hidden="true">
+            <span
+              class="coordinate-rewind__hint"
+              data-time-rewind-hint
+              aria-hidden="true"
+            >
+              <span class="coordinate-rewind__mouse">
+                <span data-time-rewind-click></span>
+              </span>
               <span
                 class="coordinate-rewind__rule"
                 data-time-rewind-rule
-                aria-hidden="true"
-              ></span>
-              Rewind the thread
+                aria-hidden="true"></span>
+              Click to rewind
             </span>
           </button>
         </div>
@@ -97,7 +111,8 @@ import "./CoordinateExperience.css";
 
       <div class="coordinate-progress" aria-hidden="true">
         <span class="coordinate-progress__track">
-          <span class="coordinate-progress__fill" data-coordinate-progress></span>
+          <span class="coordinate-progress__fill" data-coordinate-progress
+          ></span>
         </span>
         <span class="coordinate-progress__index" data-coordinate-index>01</span>
       </div>
@@ -117,9 +132,15 @@ import "./CoordinateExperience.css";
       aria-describedby="about-description"
       hidden
     >
-      <div class="coordinate-dialog__veil" data-dialog-veil aria-hidden="true"></div>
+      <div class="coordinate-dialog__veil" data-dialog-veil aria-hidden="true">
+      </div>
       <div class="coordinate-dialog__panel" data-dialog-panel>
-        <div class="coordinate-dialog__grain" data-dialog-grain aria-hidden="true"></div>
+        <div
+          class="coordinate-dialog__grain"
+          data-dialog-grain
+          aria-hidden="true"
+        >
+        </div>
         <button
           class="coordinate-dialog__close"
           type="button"
@@ -133,22 +154,25 @@ import "./CoordinateExperience.css";
           <h2 id="about-title">A place outside time.</h2>
           <div class="coordinate-dialog__copy" id="about-description">
             <p>
-              Cathedral of Threads is a hackathon-built interactive experiment about
-              collective memory. Every line and dune is generated in real time and drawn
-              toward the same impossible coordinate.
+              Cathedral of Threads is a hackathon-built interactive experiment
+              about collective memory. Every line and dune is generated in real
+              time and drawn toward the same impossible coordinate.
             </p>
             <p>
               The initial spark came from the idea of the Coordinate in
-              <cite>Attack on Titan</cite>. This is an independent visual interpretation:
-              no characters, production artwork, dialogue, music, or story material is
-              reproduced.
+              <cite>Attack on Titan</cite>. This is an independent visual
+              interpretation: no characters, production artwork, dialogue,
+              music, or story material is reproduced.
             </p>
             <p>
-              The project is not affiliated with, endorsed by, or connected to the anime,
-              manga, studios, publishers, or rights holders.
+              The project is not affiliated with, endorsed by, or connected to
+              the anime, manga, studios, publishers, or rights holders.
             </p>
           </div>
-          <p class="coordinate-dialog__meta">A hackathon project built with Astro, Three.js, and GSAP.</p>
+          <p class="coordinate-dialog__meta">
+            A hackathon project built with Astro, Three.js, and GSAP. Deployed
+            on Webflow Cloud.
+          </p>
         </div>
       </div>
     </div>

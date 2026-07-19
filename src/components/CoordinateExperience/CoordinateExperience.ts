@@ -40,6 +40,7 @@ type TimeRewindOptions = {
   button: HTMLButtonElement;
   label: HTMLElement;
   hint: HTMLElement;
+  clickIndicator: HTMLElement;
   index: HTMLElement | null;
   rule: HTMLElement;
   timeWarp: HTMLElement;
@@ -78,6 +79,7 @@ async function initExperience(experience: HTMLElement) {
   const rewindButton = experience.querySelector<HTMLButtonElement>("[data-time-rewind]");
   const rewindLabel = experience.querySelector<HTMLElement>("[data-time-rewind-label]");
   const rewindHint = experience.querySelector<HTMLElement>("[data-time-rewind-hint]");
+  const rewindClick = experience.querySelector<HTMLElement>("[data-time-rewind-click]");
   const rewindRule = experience.querySelector<HTMLElement>("[data-time-rewind-rule]");
   const timeWarp = experience.querySelector<HTMLElement>("[data-time-warp]");
 
@@ -99,6 +101,7 @@ async function initExperience(experience: HTMLElement) {
     !rewindButton ||
     !rewindLabel ||
     !rewindHint ||
+    !rewindClick ||
     !rewindRule ||
     !timeWarp
   ) {
@@ -374,6 +377,7 @@ async function initExperience(experience: HTMLElement) {
         button: rewindButton,
         label: rewindLabel,
         hint: rewindHint,
+        clickIndicator: rewindClick,
         index,
         rule: rewindRule,
         timeWarp,
@@ -1467,6 +1471,7 @@ function setupTimeRewind({
   button,
   label,
   hint,
+  clickIndicator,
   index,
   rule,
   timeWarp,
@@ -1480,6 +1485,24 @@ function setupTimeRewind({
   const rewindRate = 5;
   let isRewinding = false;
   let rewindTimeline: gsap.core.Timeline | null = null;
+  const clickIndicatorTimeline = gsap
+    .timeline({ repeat: -1, repeatDelay: 0.14 })
+    .fromTo(
+      clickIndicator,
+      { autoAlpha: 0.22, scale: 0.55 },
+      {
+        autoAlpha: 1,
+        scale: 1,
+        duration: 0.28,
+        ease: "power2.out",
+      },
+    )
+    .to(clickIndicator, {
+      autoAlpha: 0,
+      scale: 1.85,
+      duration: 0.42,
+      ease: "power2.in",
+    });
 
   const hoverTimeline = gsap
     .timeline({ paused: true })
@@ -1560,6 +1583,7 @@ function setupTimeRewind({
       index.textContent = "01";
     }
     isRewinding = false;
+    clickIndicatorTimeline.play(0);
     gsap.set([label, hint], { clearProps: "color,letterSpacing,transform" });
     gsap.set([timeWarp, ...rings], {
       clearProps: "opacity,visibility,transform",
@@ -1575,6 +1599,7 @@ function setupTimeRewind({
     isRewinding = true;
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
+    clickIndicatorTimeline.pause(0);
     hoverTimeline.pause(0);
     rewindTimeline?.kill();
     trigger?.disable(false, true);
@@ -1691,6 +1716,7 @@ function setupTimeRewind({
   button.addEventListener("click", rewind);
 
   return () => {
+    clickIndicatorTimeline.kill();
     hoverTimeline.kill();
     rewindTimeline?.kill();
     if (isRewinding) {
