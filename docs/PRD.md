@@ -1,7 +1,7 @@
 # PRD — Cathedral of Threads
 
 Status: Hackathon build  
-Platform: Desktop web  
+Platform: Desktop WebGL with a lightweight mobile 2D passage
 Framework: Astro + Three.js + GSAP
 
 ## 1. Product statement
@@ -32,9 +32,10 @@ Desired outcome:
 
 ## 3. Experience scope
 
-The experience is desktop-first and contains one route with one continuous scroll
-timeline. A sticky full-viewport stage remains in place while a 500vh scroll
-track advances the scene.
+The experience contains one route. Desktop uses one continuous scroll timeline:
+a sticky full-viewport stage remains in place while a long scroll track advances
+the scene. Phones use a separate normal-flow story made from pre-rendered scene
+stills and semantic HTML.
 
 Included:
 
@@ -48,10 +49,13 @@ Included:
 - Intro title, scroll prompt, chapter progress, and About.
 - Functional full-screen About overlay.
 - Reduced-motion behavior and WebGL failure fallback.
+- A mobile 2D passage with portrait WebP scene stills, normal document scrolling,
+  "Swipe" and "Tap" interaction language, and a recommendation to visit on
+  desktop for the full real-time experience.
 
 Not included:
 
-- Mobile-specific 3D optimization or the future 2D mobile experience.
+- Mobile Three.js, gyroscope/device-orientation permissions, or live post-processing.
 - Sound design.
 - Backend, accounts, analytics, CMS, or persistence.
 - Webflow Cloud deployment work.
@@ -102,6 +106,10 @@ Persistent or contextual UI:
 - Center overlay: loading veil and later chapter copy.
 
 All UI text is HTML. The canvas is visual and marked as decorative.
+
+On phones, three natural-scroll panels carry the same narrative beats over
+pre-rendered dark and light scene stills. About remains a native dialog and the
+credits remain real links.
 
 ## 6. Visual direction
 
@@ -169,6 +177,15 @@ AI-generated 3D can be useful for rough ideation, but generated topology usually
 needs Blender cleanup, retopology, UV review, and aggressive optimization before
 shipping to WebGL. It is not the critical path for this hackathon build.
 
+### Mobile
+
+- The desktop Three.js bundle is loaded only above the phone breakpoint.
+- Mobile uses two compressed portrait WebP stills and real HTML content.
+- Lightweight scroll parallax may move the stills, but no motion-sensor
+  permission is requested.
+- `touch-action: pan-y`, document visibility handling, and reduced-motion styles
+  keep the passage predictable and inexpensive.
+
 ## 8. Performance and quality targets
 
 - 60 fps target on a modern laptop; usable at 40+ fps on integrated graphics.
@@ -188,6 +205,10 @@ shipping to WebGL. It is not the critical path for this hackathon build.
 - About opens as a full-screen overlay, closes by button and Escape, and is
   keyboard reachable.
 - The canvas remains full-bleed without horizontal overflow at desktop widths.
+- At phone widths, the WebGL scene is not initialized and a normal-scroll 2D
+  passage is shown instead.
+- Mobile copy uses "Swipe to enter" and "Tap to rewind," and recommends desktop
+  for the full experience.
 - Reduced-motion users can access all content without a long scrub journey.
 - The first viewport retains blue sand, a central luminous tree, sparse
   left-side title, and minimal UI without depending on an external reference image.
@@ -198,6 +219,7 @@ shipping to WebGL. It is not the critical path for this hackathon build.
    pulses.
 2. Authored Blender core or root mesh only if the procedural version is limiting.
 3. Sound design with an explicit mute control.
-4. Separate lightweight mobile 2D treatment.
+4. Consider an optional pre-rendered video passage if it materially improves the
+   mobile story without increasing fragility.
 5. Performance profiling and asset compression.
 6. Webflow Cloud deployment and production observability.

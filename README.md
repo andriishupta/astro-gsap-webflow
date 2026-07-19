@@ -1,9 +1,53 @@
-# GSAP, Astro & Webflow Cloud
+# Cathedral of Threads
 
-Entry for the hackathon: https://codetv-gsap-cloud.webflow.io/
-Jul 31, 2026
+> Hackathon entry for the GSAP × Webflow challenge — July 31, 2026.
 
-## Default
+[View the live experience](https://codetv-gsap-cloud.webflow.io/) ·
+[Visit Andrii Shupta](https://andriishupta.dev) ·
+[Browse the source](https://github.com/andriishupta/astro-gsap-webflow)
+
+Cathedral of Threads is an original, one-page interactive journey into a
+metaphysical coordinate where human memories appear as luminous paths. Desktop
+visitors move through a procedural Three.js world with a single GSAP-controlled
+scroll timeline. Phones receive a separate, lightweight version made from
+pre-rendered WebP scene stills and semantic HTML.
+
+The visual language is inspired by mythic shared-memory spaces, but the project
+does not reproduce anime characters, names, symbols, costumes, dialogue, music,
+or production artwork.
+
+## Experience
+
+- Desktop: real-time WebGL terrain, filaments, particles, lighting, bloom, and a
+  reversible scroll journey.
+- Mobile: normal document scrolling, lightweight scene stills, real HTML copy,
+  and no Three.js download or sensor permission.
+- Accessibility: decorative canvas, semantic story content, keyboard-accessible
+  About UI, and reduced-motion behavior.
+- Themes: the desktop passage moves between a midnight-blue world and a
+  sand-light afterglow.
+
+## Run locally
+
+```sh
+pnpm install
+pnpm dev
+```
+
+Before handing off a production change:
+
+```sh
+pnpm check
+pnpm build
+```
+
+The product direction and acceptance criteria live in
+[`docs/PRD.md`](docs/PRD.md).
+
+## README template
+
+This project began from the GSAP, Astro, and Webflow Cloud starter described
+below. The original reference material is kept here for convenience.
 
 Astro app template with [GSAP](https://gsap.com/) loaded and ready to use, set up for Webflow Cloud. All GSAP plugins — including the formerly premium Club GSAP plugins, which are now 100% free for everyone (including commercial use) thanks to Webflow — are registered and available. Just import what you need from `src/lib/gsap.js`.
 

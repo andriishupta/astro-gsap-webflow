@@ -1,0 +1,354 @@
+.mobile-coordinate {
+  --mobile-dark: #020816;
+  --mobile-light: #f5edc9;
+  --mobile-dark-ink: #f7fbff;
+  --mobile-light-ink: #17120b;
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-coordinate {
+    position: relative;
+    display: block;
+    overflow: clip;
+    background: var(--mobile-dark);
+    color: var(--mobile-dark-ink);
+    touch-action: pan-y;
+  }
+
+  .mobile-coordinate__about {
+    position: fixed;
+    z-index: 20;
+    top: max(1rem, env(safe-area-inset-top));
+    right: 1rem;
+    padding: 0.6rem 0;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    background: transparent;
+    color: #fff;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    mix-blend-mode: difference;
+    text-transform: uppercase;
+  }
+
+  .mobile-coordinate__about:focus-visible,
+  .mobile-coordinate a:focus-visible,
+  .mobile-coordinate button:focus-visible {
+    border-radius: 2px;
+    outline: 1px solid currentColor;
+    outline-offset: 0.35rem;
+  }
+
+  .mobile-coordinate__panel {
+    position: relative;
+    display: flex;
+    min-height: 100svh;
+    padding: max(5.5rem, calc(env(safe-area-inset-top) + 4rem)) 1.35rem
+      max(2rem, calc(env(safe-area-inset-bottom) + 1rem));
+    overflow: hidden;
+    align-items: center;
+    isolation: isolate;
+  }
+
+  .mobile-coordinate__panel--approach {
+    min-height: 112svh;
+  }
+
+  .mobile-coordinate__panel--afterglow {
+    min-height: 108svh;
+    align-items: flex-start;
+    color: var(--mobile-light-ink);
+  }
+
+  .mobile-coordinate__scene {
+    --mobile-parallax: 0px;
+    position: absolute;
+    z-index: -3;
+    inset: -4%;
+    width: 108%;
+    height: 108%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 50% 50%;
+    transform: translate3d(0, var(--mobile-parallax), 0) scale(1.04);
+    will-change: transform;
+  }
+
+  .mobile-coordinate__scene--approach {
+    object-position: 42% 50%;
+  }
+
+  .mobile-coordinate__scene--afterglow {
+    object-position: 58% 50%;
+  }
+
+  .mobile-coordinate__shade {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(1, 5, 18, 0.66), transparent 32%),
+      linear-gradient(0deg, rgba(1, 6, 23, 0.76), transparent 58%),
+      linear-gradient(90deg, rgba(1, 5, 18, 0.28), transparent 76%);
+  }
+
+  .mobile-coordinate__panel--approach .mobile-coordinate__shade {
+    background:
+      linear-gradient(180deg, rgba(1, 5, 18, 0.24), transparent 34%),
+      linear-gradient(0deg, rgba(1, 6, 23, 0.88), transparent 72%);
+  }
+
+  .mobile-coordinate__panel--afterglow .mobile-coordinate__shade {
+    background:
+      linear-gradient(180deg, rgba(255, 250, 222, 0.14), transparent 38%),
+      linear-gradient(0deg, rgba(107, 74, 24, 0.32), transparent 66%);
+  }
+
+  .mobile-coordinate__index {
+    position: absolute;
+    top: max(1.25rem, env(safe-area-inset-top));
+    left: 1.35rem;
+    margin: 0;
+    color: rgba(233, 244, 255, 0.6);
+    font-size: 0.55rem;
+    letter-spacing: 0.26em;
+  }
+
+  .mobile-coordinate__panel--afterglow .mobile-coordinate__index {
+    color: rgba(23, 18, 11, 0.56);
+  }
+
+  .mobile-coordinate__copy {
+    width: min(100%, 31rem);
+    margin-top: auto;
+    padding-bottom: 15svh;
+  }
+
+  .mobile-coordinate__copy--opening {
+    margin-top: 9svh;
+    margin-bottom: auto;
+    padding: 0;
+  }
+
+  .mobile-coordinate__copy--afterglow {
+    margin-top: 19svh;
+    margin-bottom: auto;
+    padding: 0;
+  }
+
+  .mobile-coordinate__eyebrow {
+    margin: 0 0 1.25rem;
+    color: currentColor;
+    font-size: 0.56rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    opacity: 0.68;
+  }
+
+  .mobile-coordinate h1,
+  .mobile-coordinate h2 {
+    margin: 0;
+    font-family: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+
+  .mobile-coordinate h1 {
+    display: grid;
+    font-size: clamp(3.8rem, 18vw, 6.4rem);
+    line-height: 0.82;
+  }
+
+  .mobile-coordinate h1 span:last-child {
+    padding-left: 0.42em;
+    white-space: nowrap;
+  }
+
+  .mobile-coordinate h2 {
+    max-width: 8ch;
+    font-size: clamp(3.25rem, 15vw, 5.4rem);
+    line-height: 0.92;
+  }
+
+  .mobile-coordinate__premise,
+  .mobile-coordinate__copy > p:not(.mobile-coordinate__eyebrow) {
+    max-width: 28rem;
+    margin: 1.65rem 0 0;
+    color: rgba(232, 242, 255, 0.74);
+    font-size: 0.78rem;
+    letter-spacing: 0.13em;
+    line-height: 1.8;
+    text-transform: uppercase;
+  }
+
+  .mobile-coordinate__panel--afterglow
+    .mobile-coordinate__copy
+    > p:not(.mobile-coordinate__eyebrow) {
+    color: rgba(23, 18, 11, 0.66);
+  }
+
+  .mobile-coordinate__cue {
+    position: absolute;
+    bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1.25rem));
+    left: 1.35rem;
+    display: grid;
+    gap: 0.8rem;
+    color: rgba(236, 246, 255, 0.78);
+    font-size: 0.57rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .mobile-coordinate__cue > span:last-child {
+    display: block;
+    width: 1px;
+    height: 3.25rem;
+    margin-left: 0.25rem;
+    background: currentColor;
+  }
+
+  .mobile-coordinate__desktop-note {
+    max-width: 28rem;
+    margin-top: 2.5rem;
+    padding: 1rem 1.1rem;
+    border-left: 1px solid rgba(222, 239, 255, 0.55);
+    background: rgba(2, 8, 22, 0.28);
+    color: rgba(232, 242, 255, 0.8);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    line-height: 1.65;
+    text-transform: uppercase;
+  }
+
+  [data-mobile-rewind] {
+    margin-top: 2rem;
+    padding: 0.65rem 0;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    background: transparent;
+    color: currentColor;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .mobile-coordinate__footer {
+    position: absolute;
+    right: 1.35rem;
+    bottom: max(1.25rem, env(safe-area-inset-bottom));
+    left: 1.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1rem;
+    align-items: center;
+    color: rgba(23, 18, 11, 0.64);
+    font-size: 0.56rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .mobile-coordinate__footer a {
+    color: inherit;
+    text-underline-offset: 0.25em;
+  }
+
+  .mobile-coordinate__dialog {
+    width: 100%;
+    max-width: none;
+    min-height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: max(5.5rem, calc(env(safe-area-inset-top) + 4rem)) 1.35rem
+      max(2rem, calc(env(safe-area-inset-bottom) + 1rem));
+    border: 0;
+    background: #06132c;
+    color: var(--mobile-dark-ink);
+  }
+
+  .mobile-coordinate__dialog::backdrop {
+    background: #020816;
+  }
+
+  .mobile-coordinate__dialog[open] {
+    display: block;
+  }
+
+  .mobile-coordinate__dialog-close {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    right: 1rem;
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0;
+    place-items: center;
+    border: 1px solid rgba(233, 244, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(233, 244, 255, 0.06);
+    color: inherit;
+  }
+
+  .mobile-coordinate__dialog-close span {
+    font-size: 1.8rem;
+    font-weight: 200;
+    line-height: 1;
+    transform: translateY(-0.08em);
+  }
+
+  .mobile-coordinate__dialog h2 {
+    max-width: 8ch;
+    font-size: clamp(3.5rem, 16vw, 5.5rem);
+  }
+
+  .mobile-coordinate__dialog > div {
+    max-width: 40rem;
+    margin-top: 3rem;
+  }
+
+  .mobile-coordinate__dialog > div p {
+    margin: 0;
+    color: rgba(232, 242, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.72;
+  }
+
+  .mobile-coordinate__dialog > div p + p {
+    margin-top: 1.35rem;
+  }
+
+  .mobile-coordinate__dialog cite {
+    color: #fff;
+  }
+
+  .mobile-coordinate__dialog-meta {
+    max-width: 38rem;
+    margin: 2.75rem 0 0;
+    color: rgba(210, 229, 252, 0.62);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    line-height: 1.8;
+    text-transform: uppercase;
+  }
+
+  .mobile-coordinate__dialog a {
+    color: inherit;
+    text-underline-offset: 0.25em;
+  }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .mobile-coordinate__scene {
+    transform: scale(1.04);
+    will-change: auto;
+  }
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://codetv-gsap-cloud.webflow.io/sitemap.xml

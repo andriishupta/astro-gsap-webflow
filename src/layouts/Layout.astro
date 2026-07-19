@@ -4,23 +4,99 @@ import "@/styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  imageDark?: string;
+  imageLight?: string;
 }
 
 const {
-  title = "Cathedral of Threads",
-  description = "An interactive journey to the place where every memory converges.",
+  title = "Cathedral of Threads — An Interactive WebGL Journey",
+  description = "Enter Andrii Shupta's original scroll-driven WebGL journey through a world where every memory converges.",
+  imageDark = "/images/coordinate/og-dark.webp",
+  imageLight = "/images/coordinate/og-light.webp",
 } = Astro.props;
+
+const siteUrl =
+  Astro.site ?? new URL("https://codetv-gsap-cloud.webflow.io");
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl);
+const darkImageUrl = new URL(imageDark, siteUrl);
+const lightImageUrl = new URL(imageLight, siteUrl);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: "Cathedral of Threads",
+  headline: title,
+  description,
+  url: canonicalUrl.href,
+  image: [darkImageUrl.href, lightImageUrl.href],
+  creator: {
+    "@type": "Person",
+    name: "Andrii Shupta",
+    url: "https://andriishupta.dev",
+  },
+  codeRepository: "https://github.com/andriishupta/astro-gsap-webflow",
+  inLanguage: "en",
+  isAccessibleForFree: true,
+};
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#020816" />
+    <meta name="application-name" content="Cathedral of Threads" />
+    <meta name="apple-mobile-web-app-title" content="Cathedral of Threads" />
+    <meta name="author" content="Andrii Shupta" />
+    <meta name="creator" content="Andrii Shupta" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#020816" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#d9cda7" media="(prefers-color-scheme: light)" />
     <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Cathedral of Threads" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={darkImageUrl} />
+    <meta property="og:image:secure_url" content={darkImageUrl} />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Cathedral of Threads luminous coordinate in its dark blue world"
+    />
+    <meta property="og:image" content={lightImageUrl} />
+    <meta property="og:image:secure_url" content={lightImageUrl} />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Cathedral of Threads luminous coordinate in its light sand world"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={darkImageUrl} />
+    <meta
+      name="twitter:image:alt"
+      content="Cathedral of Threads luminous coordinate in a blue memory landscape"
+    />
+
     <title>{title}</title>
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+      is:inline
+    />
   </head>
   <body>
     <slot />

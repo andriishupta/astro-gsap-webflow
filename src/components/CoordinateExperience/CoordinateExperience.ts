@@ -76,7 +76,7 @@ const SCENE_PALETTES = {
     hemisphereGround: 0x6b5126,
     keyLight: 0xffdfa0,
     terrainEmissive: 0x75591e,
-    core: 0x24170d,
+    core: 0x000000,
     thread: 0x17110b,
     star: 0xe6d39d,
     terrainShadow: 0x5d4517,
@@ -827,6 +827,13 @@ function createScene(
   coreLight.position.set(base.x, base.y + 1.1, base.z);
   world.add(coreLight);
 
+  const darkCoreHalo = createDarkCoreHalo();
+  darkCoreHalo.sprite.position.set(base.x, base.y + 0.72, base.z + 0.05);
+  darkCoreHalo.sprite.scale.set(5.8, 5.8, 1);
+  darkCoreHalo.sprite.renderOrder = 4;
+  darkCoreHalo.sprite.visible = initialTheme === "light";
+  world.add(darkCoreHalo.sprite);
+
   const angularSectionCount = 720;
   const angularSectionArc = (Math.PI * 2) / angularSectionCount;
   const smokeSpreadArc = (Math.PI * 2) / 120;
@@ -1049,6 +1056,7 @@ function createScene(
   ];
   const threadPulse = { value: 0 };
   const threadTheme = { value: initialThemeMix };
+  const threadAfterglow = { value: 0 };
   const threadDarkColors = threadLayerDefinitions.map((definition) =>
     new THREE.Color(darkPalette.thread).multiplyScalar(definition.brightness),
   );
@@ -1088,7 +1096,12 @@ function createScene(
         ? threadLightColors[layerIndex]
         : threadDarkColors[layerIndex],
     );
-    configureThreadFade(material, threadPulse, threadTheme);
+    configureThreadFade(
+      material,
+      threadPulse,
+      threadTheme,
+      threadAfterglow,
+    );
     const layer = new LineSegments2(threadGeometry, material);
     layer.renderOrder = layerIndex + 1;
     world.add(layer);
@@ -1269,6 +1282,7 @@ function createScene(
     const afterglow = motionState.afterglow;
     const afterglowPulse = lightPulseState.value * afterglow;
     const themeMix = motionState.themeMix;
+    threadAfterglow.value = afterglow;
     const canopyLodProgress = smoothNoiseStep(
       THREE.MathUtils.clamp((motionState.journey - 0.06) / 0.5, 0, 1),
     );
@@ -1363,18 +1377,9 @@ function createScene(
       afterglow * 12 +
       afterglowPulse * 26 +
       tremorCurrent * (2 + Math.sin(timeSeconds * 15.5) * 1.2);
-    const lightCoreIntensity = Math.max(
-      0.12,
-      1.1 -
-        illumination * 0.28 -
-        lightPulse * 0.08 -
-        afterglow * 0.5 -
-        afterglowPulse * 0.18 +
-        tremorCurrent * 0.08,
-    );
     coreLight.intensity = THREE.MathUtils.lerp(
       darkCoreIntensity,
-      lightCoreIntensity,
+      0,
       themeMix,
     );
     coreLight.distance = THREE.MathUtils.lerp(
@@ -1382,6 +1387,18 @@ function createScene(
       16 + illumination * 4 + afterglow * 2,
       themeMix,
     );
+    const darkCoreEnergy =
+      themeMix *
+      (0.34 +
+        illumination * 0.12 +
+        lightPulse * 0.1 +
+        afterglow * 0.26 +
+        afterglowPulse * 0.12);
+    const darkCoreScale =
+      4.8 + illumination * 0.8 + afterglow * 1.4 + afterglowPulse * 0.5;
+    darkCoreHalo.sprite.visible = darkCoreEnergy > 0.001;
+    darkCoreHalo.material.opacity = Math.min(0.82, darkCoreEnergy);
+    darkCoreHalo.sprite.scale.set(darkCoreScale, darkCoreScale, 1);
     terrainMaterial.emissiveIntensity =
       (illumination * 0.2 +
         lightPulse * 0.07 +
@@ -1453,6 +1470,8 @@ function createScene(
       window.removeEventListener("pointerout", onPointerOut);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      darkCoreHalo.texture.dispose();
+      darkCoreHalo.material.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
           object.geometry.dispose();
@@ -1467,6 +1486,42 @@ function createScene(
       renderer.dispose();
     },
   };
+}
+
+function createDarkCoreHalo() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+
+  const context = canvas.getContext("2d");
+  if (context) {
+    const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gradient.addColorStop(0, "rgba(0, 0, 0, 0.96)");
+    gradient.addColorStop(0.18, "rgba(2, 2, 2, 0.82)");
+    gradient.addColorStop(0.5, "rgba(5, 5, 5, 0.3)");
+    gradient.addColorStop(1, "rgba(5, 5, 5, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0,
+    depthTest: true,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  const sprite = new THREE.Sprite(material);
+
+  return { sprite, material, texture };
 }
 
 function appendSegments(target: number[], path: Float32Array) {
@@ -1911,10 +1966,12 @@ function configureThreadFade(
   material: LineMaterial,
   pulse: { value: number },
   theme: { value: number },
+  afterglow: { value: number },
 ) {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.threadPulse = pulse;
     shader.uniforms.threadThemeMix = theme;
+    shader.uniforms.threadAfterglow = afterglow;
     shader.vertexShader = `
       varying float vThreadDistance;
       ${shader.vertexShader}
@@ -1935,13 +1992,28 @@ function configureThreadFade(
       varying float vThreadDistance;
       uniform float threadPulse;
       uniform float threadThemeMix;
+      uniform float threadAfterglow;
       ${shader.fragmentShader}
     `
+      .replace(
+        "#include <color_fragment>",
+        `
+          #include <color_fragment>
+          float lightAfterglow = threadAfterglow * threadThemeMix;
+          diffuseColor.rgb *= mix(1.0, 0.38, lightAfterglow);
+        `,
+      )
       .replace(
         "float alpha = opacity;",
         `
           float terminalFade = 1.0 - smoothstep(105.0, 280.0, vThreadDistance);
-          float darkThreadContrast = mix(1.0, 3.4, threadThemeMix);
+          float lightAfterglowContrast = mix(
+            1.0,
+            1.85,
+            threadAfterglow * threadThemeMix
+          );
+          float darkThreadContrast =
+            mix(1.0, 3.4, threadThemeMix) * lightAfterglowContrast;
           float alpha = (
             opacity *
             terminalFade *
@@ -1961,7 +2033,7 @@ function configureThreadFade(
         `,
       );
   };
-  material.customProgramCacheKey = () => "coordinate-thread-theme-fade-v4";
+  material.customProgramCacheKey = () => "coordinate-thread-theme-fade-v5";
 }
 
 function disposeMaterial(material: THREE.Material | THREE.Material[]) {

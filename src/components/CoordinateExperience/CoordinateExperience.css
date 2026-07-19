@@ -673,6 +673,18 @@
   text-transform: uppercase;
 }
 
+.coordinate-dialog__meta a {
+  color: inherit;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.24em;
+}
+
+.coordinate-dialog__meta a:hover,
+.coordinate-dialog__meta a:focus-visible {
+  color: var(--stage-ink);
+}
+
 .coordinate-fallback {
   position: absolute;
   z-index: 30;
@@ -702,6 +714,10 @@
 }
 
 @media (max-width: 900px) {
+  .coordinate-experience {
+    display: none;
+  }
+
   .coordinate-copy {
     top: 23vh;
     width: min(34rem, calc(100vw - 4rem));
