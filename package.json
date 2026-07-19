@@ -29,5 +29,8 @@
     "@types/three": "^0.185.1",
     "daisyui": "^5.6.16",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "vite": "^7"
   }
 }
