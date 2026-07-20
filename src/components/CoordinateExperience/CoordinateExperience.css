@@ -37,7 +37,7 @@
   --dialog-close-ink: rgba(241, 248, 255, 0.84);
   color-scheme: dark;
   position: relative;
-  height: 1400svh;
+  height: 1000svh;
   background: var(--experience-background);
 }
 
